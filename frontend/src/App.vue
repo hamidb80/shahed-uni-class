@@ -1,6 +1,23 @@
 <template>
   <div lang="app">
-    <div :class="['overly', { active: showMenu }]"></div>
+    <div :class="['overly', { active: showMenu }]">
+      <div class="forms" v-if="form">
+        <header>{{ form }}</header>
+
+        <div class="form login">
+          <input
+            type="text"
+            class="input"
+            v-model="secretKey"
+            placeholder="secret key"
+          />
+          <button class="btn" @click="login">ورود</button>
+        </div>
+
+        <div class="form add-class"></div>
+        <div class="form add-class"></div>
+      </div>
+    </div>
 
     <header class="app-header">
       <h1 class="title">مهندسی کامپیوتر دانشگاه شاهد 99</h1>
@@ -42,7 +59,7 @@
         </div>
 
         <template v-if="showMenu">
-          <div class="btn" v-if="secretCode === ''">
+          <div class="btn" v-if="secretKey === ''" @click="form = 'login'">
             <loginI class="icon" />
           </div>
           <template v-else>
@@ -95,7 +112,8 @@ import moreI from "./icons/vue/more.vue";
     ],
 
     showMenu: false,
-    secretCode: "",
+    secretKey: "",
+    form: "",
 
     program: [
       [
@@ -179,6 +197,13 @@ import moreI from "./icons/vue/more.vue";
       ],
     ],
   }),
+
+  methods: {
+    login() {
+      this.form = "login";
+      console.log("login");
+    },
+  },
 })
 export default class App extends Vue {}
 </script>
@@ -339,17 +364,68 @@ export default class App extends Vue {}
 }
 
 .overly {
-  pointer-events: none;
   position: fixed;
-  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100vw;
   height: 100vh;
-  background-color: black;
-  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
 
   &.active {
+    background-color: rgba(0, 0, 0, 0.3);
     pointer-events: all;
-    opacity: 0.3;
+  }
+}
+
+.forms {
+  z-index: 2;
+  max-width: 100%;
+  min-width: 50%;
+  padding-top: 30px;
+  padding-bottom: 50px;
+  .px(20px);
+  border-radius: 4px;
+  box-shadow: 0 4px 5px #00000030;
+  background-color: white;
+
+  header {
+    text-align: center;
+    .fa();
+    font-size: 26px;
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+
+    input {
+      padding: 10px;
+      border-radius: 4px;
+      border: 2px solid #565656;
+      outline: none;
+      font-size: 18px;
+    }
+
+    .btn {
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      .px(16px);
+      .py(6px);
+      border: 2px solid tomato;
+      background-color: tomato;
+      color: white;
+      .fa();
+      font-size: 18px;
+
+      &:hover {
+        background-color: transparent;
+        color: tomato;
+      }
+    }
   }
 }
 </style>
