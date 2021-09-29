@@ -2,7 +2,7 @@
   <div lang="app">
     <div :class="['overly', { active: showMenu }]">
       <div class="forms" v-if="form && showMenu">
-        <div v-if="loading">صبر کنید ...</div>
+        <div v-if="loading" class="loading">صبر کنید ...</div>
         <login-form v-else-if="form === 'login'" @submit="login" />
         <class-form
           v-else-if="form === 'class'"
@@ -22,12 +22,18 @@
       <div class="column times">
         <div class="corner cell"></div>
         <div class="time cell" v-for="time in classTimes" :key="time">
-          {{ time }}
+          <span class="text">
+            {{ time }}
+          </span>
         </div>
       </div>
 
       <div class="column" v-for="(day, di) in program" :key="di">
-        <div class="day cell">{{ weekDays[di] }}</div>
+        <div class="day cell">
+          <span class="text">
+            {{ weekDays[di] }}
+          </span>
+        </div>
         <div
           :class="['time', 'cell', `size-${time.length}`]"
           v-for="(time, ti) in day"
@@ -146,12 +152,18 @@ const httpClient = axios.create({
     },
 
     async login(secretKey: string) {
+      this.loading = true;
+
       this.secretKey = secretKey;
       let res = await httpClient.post("/verify", { secretKey }, this.reqCfg);
       this.isVerifed = res.data["result"];
+
+      this.loading = false;
     },
 
     async createOrUpadteClass(classId: string, classObject: unknown) {
+      this.loading = true;
+
       if (classId)
         await httpClient.put(`/class/${classId}`, classObject, this.reqCfg);
       else await httpClient.post("/class", classObject, this.reqCfg);
@@ -160,6 +172,9 @@ const httpClient = axios.create({
     },
 
     async deleteClass(classId: string) {
+      this.loading = true;
+      this.selectedClassId = "";
+
       await httpClient.delete(`/class/${classId}`, this.reqCfg);
       await this.update();
     },
@@ -218,7 +233,11 @@ export default class App extends Vue {
       border: 0.5px solid #aaa;
       width: 200px;
       height: 80px;
-      .fa();
+
+      .class,
+      .text {
+        .fa();
+      }
 
       &.day,
       &.corner {
@@ -360,12 +379,19 @@ export default class App extends Vue {
   box-shadow: 0 4px 5px #00000030;
   background-color: white;
 
-  header {
-    text-align: center;
+  .loading {
     .fa();
-    font-size: 26px;
+    text-align: center;
+    font-size: 18px;
   }
+
   .form {
+    header {
+      text-align: center;
+      .fa();
+      font-size: 26px;
+    }
+
     display: flex;
     flex-direction: column;
 
