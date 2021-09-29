@@ -4,7 +4,7 @@
       <div class="forms" v-if="form">
         <header>{{ form }}</header>
 
-        <div class="form login">
+        <div class="form login" v-if="form === 'login'">
           <input
             type="text"
             class="input"
@@ -13,9 +13,56 @@
           />
           <button class="btn" @click="login">ورود</button>
         </div>
+        <div class="form class" v-else-if="form === 'class'">
+          <input
+            type="text"
+            class="input"
+            v-model="secretKey"
+            placeholder="class name"
+          />
+          <input
+            type="text"
+            class="input"
+            v-model="secretKey"
+            placeholder="teacher name"
+          />
 
-        <div class="form add-class"></div>
-        <div class="form add-class"></div>
+          <div class="days">
+            <div
+              v-for="(day, di) in weekDays"
+              :key="di"
+              @click="toggleDay(di)"
+              :class="['day', { active: selectedDaysTimes[di] !== null }]"
+            >
+              <span> {{ day }} </span>
+            </div>
+          </div>
+
+          <div class="class-time-settings">
+            <div
+              v-for="(_, di) in selectedDaysTimes"
+              :key="di"
+              class="day"
+              v-show="selectedDaysTimes[di] !== null"
+            >
+              <div class="name">
+                {{ weekDays[di] }}
+              </div>
+              <div class="times">
+                <div
+                  v-for="(time, ti) in classTimes"
+                  :key="ti"
+                  @click="toggleTime(di, ti)"
+                  :class="['time', { active: selectedDaysTimes[di] === ti }]"
+                >
+                  {{ time }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn">ثبت کلاس</div>
+        </div>
       </div>
     </div>
 
@@ -40,16 +87,12 @@
         >
           <template v-if="time.length">
             <div class="class" v-for="(cls, ci) in time" :key="ci">
-              {{ cls.lesson }} - {{ cls.teacher }}
+              {{ cls.lesson }}
             </div>
           </template>
           <div v-else class="class empty"></div>
         </div>
       </div>
-    </div>
-
-    <div class="dialog-wrapper">
-      <div class="dialog"></div>
     </div>
 
     <footer class="app-footer">
@@ -83,6 +126,11 @@ import { convertLatin2PersianDigits } from "./utils/persian";
 import loginI from "./icons/vue/login.vue";
 import moreI from "./icons/vue/more.vue";
 
+interface selectedDay {
+  dayIndex: number;
+  timeIndex: number;
+}
+
 @Options({
   name: "main-page",
   components: {
@@ -111,9 +159,11 @@ import moreI from "./icons/vue/more.vue";
       "جمعه",
     ],
 
-    showMenu: false,
+    showMenu: true,
+    isVerifed: false,
     secretKey: "",
-    form: "",
+    form: "class",
+    selectedDaysTimes: [null, null, null, null, null, null, null],
 
     program: [
       [
@@ -199,6 +249,15 @@ import moreI from "./icons/vue/more.vue";
   }),
 
   methods: {
+    toggleDay(di: number) {
+      this.selectedDaysTimes[di] =
+        this.selectedDaysTimes[di] === null ? 0 : null;
+    },
+
+    toggleTime(di: number, ti: number) {
+      this.selectedDaysTimes[di] = this.selectedDaysTimes[di] === ti ? 0 : ti;
+    },
+
     login() {
       this.form = "login";
       console.log("login");
@@ -326,11 +385,6 @@ export default class App extends Vue {}
   }
 }
 
-.dialog-wrapper {
-  .dialog {
-  }
-}
-
 .app-footer {
   position: fixed;
   bottom: 0;
@@ -381,8 +435,7 @@ export default class App extends Vue {}
 
 .forms {
   z-index: 2;
-  max-width: 100%;
-  min-width: 50%;
+  width: 70%;
   padding-top: 30px;
   padding-bottom: 50px;
   .px(20px);
@@ -398,6 +451,79 @@ export default class App extends Vue {}
   .form {
     display: flex;
     flex-direction: column;
+
+    .class-time-settings {
+      display: flex;
+      flex-direction: column;
+
+      .day {
+        display: flex;
+        flex-direction: row-reverse;
+        border-top: 1px solid #eee;
+
+        .name {
+          .fa();
+          width: 160px;
+          text-align: right;
+        }
+
+        .times {
+          flex-grow: 1;
+          flex-wrap: wrap;
+          display: inline-flex;
+          flex-direction: row;
+
+          .time {
+            .mx(6px);
+            .my(4px);
+            border-radius: 4px;
+            background-color: #eee;
+            color: #212121;
+            .fa();
+            cursor: pointer;
+            padding: 6px 12px;
+
+            &:first-child {
+              margin-left: 0;
+            }
+            &:last-child {
+              margin-right: 0;
+            }
+            &.active {
+              color: white;
+              background-color: tomato;
+            }
+          }
+        }
+      }
+    }
+
+    .days {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      .my(40px);
+
+      .day {
+        border-radius: 4px;
+        width: 80px;
+        text-align: center;
+        .fa();
+        .px(8px);
+        .py(2px);
+        .mx(-16px);
+        font-size: 16px;
+        transform: rotate(90deg);
+        color: #424242;
+        background-color: #eee;
+        cursor: pointer;
+
+        &.active {
+          color: white;
+          background-color: tomato;
+        }
+      }
+    }
 
     input {
       padding: 10px;
