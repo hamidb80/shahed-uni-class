@@ -1,7 +1,7 @@
 <template>
   <div lang="app">
     <div :class="['overly', { active: showMenu }]">
-      <div class="forms" v-if="form">
+      <div class="forms" v-if="form && showMenu">
         <header>{{ form }}</header>
 
         <div class="form login" v-if="form === 'login'">
@@ -53,7 +53,14 @@
                   v-for="(time, ti) in classTimes"
                   :key="ti"
                   @click="toggleTime(di, ti)"
-                  :class="['time', { active: selectedDaysTimes[di] === ti }]"
+                  :class="[
+                    'time',
+                    {
+                      active:
+                        selectedDaysTimes[di] &&
+                        selectedDaysTimes[di].includes(ti),
+                    },
+                  ]"
                 >
                   {{ time }}
                 </div>
@@ -86,8 +93,8 @@
           :key="ti"
         >
           <template v-if="time.length">
-            <div class="class" v-for="(cls, ci) in time" :key="ci">
-              {{ cls.lesson }}
+            <div class="class" v-for="clsId in time" :key="clsId">
+              {{ classes[clsId].lesson }}
             </div>
           </template>
           <div v-else class="class empty"></div>
@@ -102,14 +109,11 @@
         </div>
 
         <template v-if="showMenu">
-          <div class="btn" v-if="secretKey === ''" @click="form = 'login'">
-            <loginI class="icon" />
+          <div class="btn" v-if="isVerifed" @click="form = 'class'">
+            <schoolI class="icon" />
           </div>
           <template v-else>
-            <div class="btn">
-              <loginI class="icon" />
-            </div>
-            <div class="btn">
+            <div class="btn" @click="form = 'login'">
               <loginI class="icon" />
             </div>
           </template>
@@ -122,20 +126,24 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { convertLatin2PersianDigits } from "./utils/persian";
+import axios from "axios";
 
 import loginI from "./icons/vue/login.vue";
 import moreI from "./icons/vue/more.vue";
+import schoolI from "./icons/vue/school.vue";
 
-interface selectedDay {
-  dayIndex: number;
-  timeIndex: number;
-}
+const httpClient = axios.create({
+  baseURL: "http://localhost:3000/api/",
+  timeout: 1000,
+  // headers: { "Access-Control-Allow-Origin": "*" },
+});
 
 @Options({
   name: "main-page",
   components: {
     loginI,
     moreI,
+    schoolI,
   },
 
   data: () => ({
@@ -159,109 +167,48 @@ interface selectedDay {
       "جمعه",
     ],
 
-    showMenu: true,
+    showMenu: false,
     isVerifed: false,
     secretKey: "",
-    form: "class",
+    form: "",
     selectedDaysTimes: [null, null, null, null, null, null, null],
 
-    program: [
-      [
-        // sat
-        [{ teacher: "زمانی", lesson: "مدار" }],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ],
-
-      [
-        // sun
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ],
-
-      [
-        // mon
-        [],
-        [],
-        [],
-        [
-          { teacher: "زمانی", lesson: "مدار" },
-          { teacher: "زمانی", lesson: "مدار" },
-        ],
-        [{ teacher: "زمانی", lesson: "مدار" }],
-        [],
-        [],
-      ],
-
-      [
-        // tue
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ],
-
-      [
-        // wed
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ],
-
-      [
-        // thu
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ],
-
-      [
-        // fri
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ],
-    ],
+    classes: {}, // classId => class{teacher, lesson, program}
+    program: [],
   }),
 
   methods: {
     toggleDay(di: number) {
       this.selectedDaysTimes[di] =
-        this.selectedDaysTimes[di] === null ? 0 : null;
+        this.selectedDaysTimes[di] === null ? [] : null;
     },
 
     toggleTime(di: number, ti: number) {
-      this.selectedDaysTimes[di] = this.selectedDaysTimes[di] === ti ? 0 : ti;
+      let i = this.selectedDaysTimes[di].findIndex((v: number) => v === ti);
+
+      if (i === -1) this.selectedDaysTimes[di].push(ti);
+      else this.selectedDaysTimes[di].splice(i, 1);
     },
 
-    login() {
-      this.form = "login";
-      console.log("login");
+    async login() {
+      let res = await httpClient.post("/verify", {
+        secretKey: this.secretKey,
+      });
+
+      this.isVerifed = res.data["result"];
+
+      console.log(res);
     },
+
+    async update() {
+      let res = await httpClient.get("/getAll");
+      this.classes = res.data.classes;
+      this.program = res.data.program;
+    },
+  },
+
+  mounted() {
+    this.update();
   },
 })
 export default class App extends Vue {}

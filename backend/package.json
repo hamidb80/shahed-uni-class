@@ -11,8 +11,11 @@
   "author": "hamidb80",
   "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
+    "mongodb": "^4.1.2",
     "node-telegram-bot-api": "^0.54.0",
-    "telegraf": "^4.4.2"
+    "telegraf": "^4.4.2",
+    "validate-structure": "^2.0.0"
   }
 }
