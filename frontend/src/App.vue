@@ -403,6 +403,7 @@ export default class App extends Vue {
         display: flex;
         flex-direction: row-reverse;
         border-top: 1px solid #eee;
+        align-items: center;
 
         .name {
           .fa();
