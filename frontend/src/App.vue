@@ -55,11 +55,11 @@
         </div>
 
         <template v-if="showMenu">
-          <div class="btn" v-if="isVerifed" @click="form = 'class'">
+          <div class="btn" v-if="isVerifed" @click="changeForm('class')">
             <schoolI class="icon" />
           </div>
           <template v-else>
-            <div class="btn" @click="form = 'login'">
+            <div class="btn" @click="changeForm('login')">
               <loginI class="icon" />
             </div>
           </template>
@@ -115,9 +115,11 @@ const httpClient = axios.create({
   }),
 
   computed: {
-    headers() {
+    reqCfg() {
       return {
-        secretKey: this.secretKey,
+        headers: {
+          "secret-key": this.secretKey,
+        },
       };
     },
   },
@@ -129,20 +131,28 @@ const httpClient = axios.create({
       this.selectedClassId = classId;
     },
 
+    changeForm(formName: string) {
+      this.form = formName;
+      this.selectedClassId = "";
+    },
+
     async login(secretKey: string) {
       this.secretKey = secretKey;
-      let res = await httpClient.post("/verify", { secretKey }, this.headers);
+      let res = await httpClient.post("/verify", { secretKey }, this.reqCfg);
       this.isVerifed = res.data["result"];
     },
 
     async createOrUpadteClass(classId: string, classObject: unknown) {
       if (classId)
-        await httpClient.put(`/class/${classId}`, classObject, this.headers);
-      else await httpClient.post("/class", classObject, this.headers);
+        await httpClient.put(`/class/${classId}`, classObject, this.reqCfg);
+      else await httpClient.post("/class", classObject, this.reqCfg);
+
+      await this.update();
     },
 
     async deleteClass(classId: string) {
-      await httpClient.delete(`/class/${classId}`, this.headers);
+      await httpClient.delete(`/class/${classId}`, this.reqCfg);
+      await this.update();
     },
 
     async update() {
