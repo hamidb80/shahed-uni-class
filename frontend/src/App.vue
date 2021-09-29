@@ -2,74 +2,14 @@
   <div lang="app">
     <div :class="['overly', { active: showMenu }]">
       <div class="forms" v-if="form && showMenu">
-        <header>{{ form }}</header>
-
-        <div class="form login" v-if="form === 'login'">
-          <input
-            type="text"
-            class="input"
-            v-model="secretKey"
-            placeholder="secret key"
-          />
-          <button class="btn" @click="login">ورود</button>
-        </div>
-        <div class="form class" v-else-if="form === 'class'">
-          <input
-            type="text"
-            class="input"
-            v-model="secretKey"
-            placeholder="class name"
-          />
-          <input
-            type="text"
-            class="input"
-            v-model="secretKey"
-            placeholder="teacher name"
-          />
-
-          <div class="days">
-            <div
-              v-for="(day, di) in weekDays"
-              :key="di"
-              @click="toggleDay(di)"
-              :class="['day', { active: selectedDaysTimes[di] !== null }]"
-            >
-              <span> {{ day }} </span>
-            </div>
-          </div>
-
-          <div class="class-time-settings">
-            <div
-              v-for="(_, di) in selectedDaysTimes"
-              :key="di"
-              class="day"
-              v-show="selectedDaysTimes[di] !== null"
-            >
-              <div class="name">
-                {{ weekDays[di] }}
-              </div>
-              <div class="times">
-                <div
-                  v-for="(time, ti) in classTimes"
-                  :key="ti"
-                  @click="toggleTime(di, ti)"
-                  :class="[
-                    'time',
-                    {
-                      active:
-                        selectedDaysTimes[di] &&
-                        selectedDaysTimes[di].includes(ti),
-                    },
-                  ]"
-                >
-                  {{ time }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="btn">ثبت کلاس</div>
-        </div>
+        <login-form v-if="form === 'login'" @submit="login" />
+        <class-form
+          v-else-if="form === 'class'"
+          :data="selectedClassId ? classes[selectedClassId] : {}"
+          :isAdmin="isVerifed"
+          @delete="deleteClass"
+          @createOrUpadte="createOrUpadteClass"
+        />
       </div>
     </div>
 
@@ -93,7 +33,12 @@
           :key="ti"
         >
           <template v-if="time.length">
-            <div class="class" v-for="clsId in time" :key="clsId">
+            <div
+              class="class"
+              v-for="clsId in time"
+              :key="clsId"
+              @click="clickOnClass(clsId)"
+            >
               {{ classes[clsId].lesson }}
             </div>
           </template>
@@ -126,7 +71,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { convertLatin2PersianDigits } from "./utils/persian";
+import { weekDays, classTimes } from "./utils/meta";
 import axios from "axios";
 
 import loginI from "./icons/vue/login.vue";
@@ -134,10 +79,12 @@ import moreI from "./icons/vue/more.vue";
 import schoolI from "./icons/vue/school.vue";
 import closeI from "./icons/vue/close.vue";
 
+import loginF from "./forms/login.vue";
+import classF from "./forms/class.vue";
+
 const httpClient = axios.create({
   baseURL: "http://localhost:3000/api/",
-  timeout: 1000,
-  // headers: { "Access-Control-Allow-Origin": "*" },
+  timeout: 10 * 1000,
 });
 
 @Options({
@@ -147,60 +94,55 @@ const httpClient = axios.create({
     moreI,
     schoolI,
     closeI,
+
+    "class-form": classF,
+    "login-form": loginF,
   },
 
   data: () => ({
-    classTimes: [
-      "8 - 9:30",
-      "9:30 - 11",
-      "11 - 12:30",
-      "13:30 - 15",
-      "15 - 16:30",
-      "16:30 - 18",
-      "18 - 19:30",
-    ].map(convertLatin2PersianDigits),
+    weekDays,
+    classTimes,
 
-    weekDays: [
-      "شنبه",
-      "یک شنبه",
-      "دو شنبه",
-      "سه شنبه",
-      "چهارشنبه",
-      "پنج شنبه",
-      "جمعه",
-    ],
-
-    showMenu: false,
     isVerifed: false,
-    secretKey: "",
+    showMenu: false,
     form: "",
-    selectedDaysTimes: [null, null, null, null, null, null, null],
+    secretKey: "",
+
+    selectedClassId: "",
 
     classes: {}, // classId => class{teacher, lesson, program}
     program: [],
   }),
 
-  methods: {
-    toggleDay(di: number) {
-      this.selectedDaysTimes[di] =
-        this.selectedDaysTimes[di] === null ? [] : null;
-    },
-
-    toggleTime(di: number, ti: number) {
-      let i = this.selectedDaysTimes[di].findIndex((v: number) => v === ti);
-
-      if (i === -1) this.selectedDaysTimes[di].push(ti);
-      else this.selectedDaysTimes[di].splice(i, 1);
-    },
-
-    async login() {
-      let res = await httpClient.post("/verify", {
+  computed: {
+    headers() {
+      return {
         secretKey: this.secretKey,
-      });
+      };
+    },
+  },
 
+  methods: {
+    clickOnClass(classId: string) {
+      this.showMenu = true;
+      this.form = "class";
+      this.selectedClassId = classId;
+    },
+
+    async login(secretKey: string) {
+      this.secretKey = secretKey;
+      let res = await httpClient.post("/verify", { secretKey }, this.headers);
       this.isVerifed = res.data["result"];
+    },
 
-      console.log(res);
+    async createOrUpadteClass(classId: string, classObject: unknown) {
+      if (classId)
+        await httpClient.put(`/class/${classId}`, classObject, this.headers);
+      else await httpClient.post("/class", classObject, this.headers);
+    },
+
+    async deleteClass(classId: string) {
+      await httpClient.delete(`/class/${classId}`, this.headers);
     },
 
     async update() {
@@ -214,7 +156,9 @@ const httpClient = axios.create({
     this.update();
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  secretKey!: string;
+}
 </script>
 
 <style lang="less">
@@ -478,6 +422,8 @@ export default class App extends Vue {}
     input {
       padding: 10px;
       border-radius: 4px;
+      .fa();
+      direction: rtl;
       border: 2px solid #565656;
       outline: none;
       font-size: 18px;

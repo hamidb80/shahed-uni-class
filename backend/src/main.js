@@ -97,6 +97,12 @@ app.post('/api/verify', (req, res) => {
   res.send({ result: req.body.secretKey === SECRET_KEY })
 })
 
+
+app.post('/api/update', (req, res) => {
+  update()
+  res.send({ result: "ok" })
+})
+
 function checkSecretKey(next) {
   return (req, res) => {
     if (req.headers["secret-key"] === SECRET_KEY)
