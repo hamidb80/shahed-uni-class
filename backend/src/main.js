@@ -24,7 +24,7 @@ app.use(express.static('./static'))
 
 let
   classes = {}, // class_id => class
-  program = [] // array of day [day: array of class_ids]
+  program = [] // array of day | day is array of time | time is array of class_ids
 
 
 const
