@@ -108,7 +108,7 @@ function checkSecretKey(next) {
     if (req.headers["secret-key"] === SECRET_KEY)
       next(req, res)
     else
-      res.status(401).send({ msg: "you are not an admin" , headers: req.headers})
+      res.status(401).send({ msg: "you are not an admin", headers: req.headers })
   }
 }
 
@@ -131,7 +131,7 @@ app.post('/api/class', checkSecretKey(async (req, res) => {
 }))
 app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
   if (matchClass(req.body)) {
-    let dbRes = await runQuery(async () => await scc.updateOne({ _id: ObjectId(req.params.cid) }, req.body))
+    let dbRes = await runQuery(async () => await scc.updateOne({ _id: ObjectId(req.params.cid) }, { $set: req.body }))
     await update()
     res.send(dbRes)
   }

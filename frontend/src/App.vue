@@ -2,7 +2,8 @@
   <div lang="app">
     <div :class="['overly', { active: showMenu }]">
       <div class="forms" v-if="form && showMenu">
-        <login-form v-if="form === 'login'" @submit="login" />
+        <div v-if="loading">صبر کنید ...</div>
+        <login-form v-else-if="form === 'login'" @submit="login" />
         <class-form
           v-else-if="form === 'class'"
           :data="selectedClassId ? classes[selectedClassId] : {}"
@@ -49,7 +50,13 @@
 
     <footer class="app-footer">
       <div class="tool-bar">
-        <div class="btn" @click="showMenu = !showMenu">
+        <div
+          class="btn"
+          @click="
+            showMenu = !showMenu;
+            form = '';
+          "
+        >
           <closeI v-if="showMenu" class="icon" />
           <moreI v-else class="icon" />
         </div>
@@ -112,6 +119,8 @@ const httpClient = axios.create({
 
     classes: {}, // classId => class{teacher, lesson, program}
     program: [],
+
+    loading: false,
   }),
 
   computed: {
@@ -156,9 +165,13 @@ const httpClient = axios.create({
     },
 
     async update() {
+      this.loading = true;
+
       let res = await httpClient.get("/getAll");
       this.classes = res.data.classes;
       this.program = res.data.program;
+
+      this.loading = false;
     },
   },
 
