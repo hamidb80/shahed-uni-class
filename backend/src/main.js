@@ -108,7 +108,7 @@ function checkSecretKey(next) {
     if (req.headers["secret-key"] === SECRET_KEY)
       next(req, res)
     else
-      res.status(401).send({ msg: "you are not an admin" })
+      res.status(401).send({ msg: "you are not an admin" , headers: req.headers})
   }
 }
 
@@ -140,6 +140,7 @@ app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
 }))
 app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
   let dbRes = await runQuery(async () => await scc.deleteOne({ _id: ObjectId(req.params.cid) }))
+  await update()
   res.send(dbRes)
 }))
 
