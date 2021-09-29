@@ -138,18 +138,32 @@ app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
 }))
 
 app.post('/api/bot/', checkSecretKey((req, res) => {
-  // bot.sendMessage(GROUP_CHATID, req.body.msg)
+  // send2Group( req.body.msg)
   res.send(req.body)
 }))
+
+function send2Group(msg) {
+  // bot.sendMessage(GROUP_CHATID, msg)
+}
 
 app.listen(3000, () => {
   update()
 })
 
+
+function runScheduler(params) {
+  return setInterval(() => {
+
+    // send2Group(req.body.msg)
+
+  }, 60 * 1000)
+}
+
+
+runScheduler()
 // --------------------------------
 
 // bot.on("message", (msg) => {
 //   if (msg.text === '/start')
 //     bot.sendMessage(msg.chat.id, "در حال اجرا")
 // })
-

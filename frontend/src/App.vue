@@ -105,7 +105,8 @@
     <footer class="app-footer">
       <div class="tool-bar">
         <div class="btn" @click="showMenu = !showMenu">
-          <moreI class="icon" />
+          <closeI v-if="showMenu" class="icon" />
+          <moreI v-else class="icon" />
         </div>
 
         <template v-if="showMenu">
@@ -131,6 +132,7 @@ import axios from "axios";
 import loginI from "./icons/vue/login.vue";
 import moreI from "./icons/vue/more.vue";
 import schoolI from "./icons/vue/school.vue";
+import closeI from "./icons/vue/close.vue";
 
 const httpClient = axios.create({
   baseURL: "http://localhost:3000/api/",
@@ -144,6 +146,7 @@ const httpClient = axios.create({
     loginI,
     moreI,
     schoolI,
+    closeI,
   },
 
   data: () => ({
