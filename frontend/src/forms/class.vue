@@ -55,15 +55,16 @@
     </div>
 
     <div class="btn" v-if="isAdmin" @click="handleSubmit">ثبت کلاس</div>
-    <div class="btn" v-if="isAdmin && fromExisting" @click="handleDelete">حذف کلاس</div>
+    <div class="btn" v-if="isAdmin && fromExisting" @click="handleDelete">
+      حذف کلاس
+    </div>
   </div>
 </template>
 
-<script lang="ts">
-import { Options, Vue } from "vue-class-component";
-import { classTimes, weekDays } from "../utils/meta";
+<script>
+import { classTimes, weekDays } from "../utils/meta.js";
 
-@Options({
+export default {
   props: {
     data: Object,
     isAdmin: Boolean,
@@ -96,14 +97,14 @@ import { classTimes, weekDays } from "../utils/meta";
   },
 
   methods: {
-    checkInput(inputData: any) {
+    checkInput(inputData) {
       if (Object.keys(inputData).length !== 0) {
         this.teacher = inputData["teacher"];
         this.lesson = inputData["lesson"];
         this.program = inputData["program"];
         this.selectedDays = inputData["program"]
-          .map((day: number[], i: number) => (day.length !== 0 ? i : -1))
-          .filter((n: number) => n !== -1);
+          .map((day, i) => (day.length !== 0 ? i : -1))
+          .filter((n) => n !== -1);
 
         this.fromExisting = true;
       } else {
@@ -111,18 +112,18 @@ import { classTimes, weekDays } from "../utils/meta";
       }
     },
 
-    toggleDay(di: number) {
+    toggleDay(di) {
       if (!this.isAdmin) return;
 
-      let i = this.selectedDays.findIndex((d: number) => d === di);
+      let i = this.selectedDays.findIndex((d) => d === di);
 
       if (i === -1) this.selectedDays.push(di);
       else this.selectedDays.splice(i, 1);
     },
-    toggleTime(di: number, ti: number) {
+    toggleTime(di, ti) {
       if (!this.isAdmin) return;
 
-      let i = this.program[di].findIndex((v: number) => v === ti);
+      let i = this.program[di].findIndex((v) => v === ti);
 
       if (i === -1) this.program[di].push(ti);
       else this.program[di].splice(i, 1);
@@ -136,14 +137,11 @@ import { classTimes, weekDays } from "../utils/meta";
       });
     },
 
-    handleDelete(){
-      this.$emit("delete", this.data["_id"])
-    }
+    handleDelete() {
+      this.$emit("delete", this.data["_id"]);
+    },
   },
-})
-export default class HelloWorld extends Vue {
-  msg!: string;
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

@@ -1,5 +1,5 @@
 <template>
-  <div lang="app">
+  <div>
     <div :class="['overly', { active: showMenu }]">
       <div class="forms" v-if="form && showMenu">
         <div v-if="loading" class="loading">صبر کنید ...</div>
@@ -82,9 +82,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Options, Vue } from "vue-class-component";
-import { weekDays, classTimes } from "./utils/meta";
+<script>
+import { weekDays, classTimes } from "./utils/meta.js";
 import axios from "axios";
 
 import loginI from "./icons/vue/login.vue";
@@ -98,13 +97,13 @@ import classF from "./forms/class.vue";
 const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
-      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
-      : // ? "http://localhost:3000/api/"
+      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/" :
+      // ? "http://localhost:3000/api/" :
         "/api/",
   timeout: 10 * 1000,
 });
 
-@Options({
+export default {
   name: "main-page",
   components: {
     loginI,
@@ -144,18 +143,18 @@ const httpClient = axios.create({
   },
 
   methods: {
-    clickOnClass(classId: string) {
+    clickOnClass(classId) {
       this.showMenu = true;
       this.form = "class";
       this.selectedClassId = classId;
     },
 
-    changeForm(formName: string) {
+    changeForm(formName) {
       this.form = formName;
       this.selectedClassId = "";
     },
 
-    async login(secretKey: string) {
+    async login(secretKey) {
       this.loading = true;
 
       this.secretKey = secretKey;
@@ -165,7 +164,7 @@ const httpClient = axios.create({
       this.loading = false;
     },
 
-    async createOrUpadteClass(classId: string, classObject: unknown) {
+    async createOrUpadteClass(classId, classObject) {
       this.loading = true;
 
       if (classId)
@@ -175,7 +174,7 @@ const httpClient = axios.create({
       await this.update();
     },
 
-    async deleteClass(classId: string) {
+    async deleteClass(classId) {
       this.loading = true;
       this.selectedClassId = "";
 
@@ -197,9 +196,6 @@ const httpClient = axios.create({
   mounted() {
     this.update();
   },
-})
-export default class App extends Vue {
-  secretKey!: string;
 }
 </script>
 
@@ -541,9 +537,14 @@ export default class App extends Vue {
       .class-time-settings {
         .day {
           flex-direction: column;
+          
           .name {
             text-align: center;
             .my(6px);
+          }
+
+          .times{
+            justify-content: center;
           }
         }
       }

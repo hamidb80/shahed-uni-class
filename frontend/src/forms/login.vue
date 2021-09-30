@@ -6,10 +6,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Options, Vue } from "vue-class-component";
+<script>
 
-@Options({
+export default {
   emits: ["submit"],
 
   data: () => ({
@@ -21,8 +20,7 @@ import { Options, Vue } from "vue-class-component";
       this.$emit("submit", this.secretKey);
     },
   },
-})
-export default class HelloWorld extends Vue {}
+}
 </script>
 
 <style scoped lang="less">

@@ -1,4 +1,4 @@
-const latin2persionDigits: { [key: string]: string } = {
+const latin2persionDigits= {
   "0": '۰',
   "1": '۱',
   "2": '۲',
@@ -11,7 +11,7 @@ const latin2persionDigits: { [key: string]: string } = {
   "9": '۹',
 }
 
-export function convertLatin2PersianDigits(str: string): string {
+export function convertLatin2PersianDigits(str){
   let res = ""
   for (const c of str)
     res += latin2persionDigits[c] || c
