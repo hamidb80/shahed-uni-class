@@ -1,12 +1,12 @@
 import express from 'express'
 import cors from 'cors'
 import TelegramBot from 'node-telegram-bot-api'
+import path from 'path'
 
 import { ObjectId } from 'mongodb'
 import pickRandom from 'pick-random'
 import { difference } from "set-operations"
 import moment from 'moment'
-// import {} from 'moment'
 
 import { validateClass } from './types.js'
 import { scc, runQuery } from './db.js'
@@ -17,11 +17,12 @@ import { modulo } from '../utils/math.js'
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 
 // init services --------------------------
+const __dirname = path.resolve();
 
 const app = express()
 app.use(cors())
 app.use(express.json())
-app.use(express.static('./static'))
+app.use(express.static('./dist'))
 
 const bot = new TelegramBot(TG_TOKEN, { polling: true })
 
@@ -88,7 +89,8 @@ function checkSecretKey(next) {
 }
 
 app.get('/', (req, res) => {
-  res.send("hey")
+  console.log('yo');
+  res.sendFile(path.join(__dirname, 'dist', '/page.html'));
 })
 
 app.get('/api/getAll', async (req, res) => {
@@ -137,7 +139,7 @@ app.listen(3000, async () => {
 
 // telegram bot -------------------------
 function send2Group(msg) {
-  bot.sendMessage(GROUP_CHATID, msg)
+  // bot.sendMessage(GROUP_CHATID, msg)
 }
 
 bot.on("message", (msg) => {
@@ -232,5 +234,5 @@ function task() {
 
 function runScheduler() {
   task()
-  return setInterval(task, 10 * 1000)
+  return setInterval(task, 60 * 1000)
 }

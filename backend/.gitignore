@@ -1,0 +1,2 @@
+dist/*
+!dist/page.sample.html
