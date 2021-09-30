@@ -11,13 +11,12 @@ import moment from 'moment'
 import { validateClass } from './types.js'
 import { scc, runQuery } from './db.js'
 import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
-import { isIn } from '../utils/array.js'
 import { modulo } from '../utils/math.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 
 // init services --------------------------
-const __dirname = path.resolve();
+const __dirname = path.resolve()
 
 const app = express()
 app.use(cors())
@@ -89,9 +88,13 @@ function checkSecretKey(next) {
 }
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', '/page.html'));
+  res.sendFile(path.join(__dirname, 'dist', '/page.html'))
 })
 
+
+app.get('/api/now', (req, res) => {
+  res.send(moment().format())
+})
 app.get('/api/getAll', async (req, res) => {
   res.send({ classes, program })
 })
@@ -190,7 +193,7 @@ function getClassTimeIndex(timeArr) {
       return classTimeIndex
   }
 
-  return classStartTimes.length
+  return classStartTimes.length - 1
 }
 
 let
@@ -203,7 +206,7 @@ function task() {
   const time = getCurrentTimeInfo()
   let newClassTimeIndex = getClassTimeIndex(time.timeArr)
 
-  if (isIn(newClassTimeIndex, [-1, classStartTimes.length]))
+  if ([-1, classStartTimes.length - 1].includes(newClassTimeIndex))
     lastClassIds = []
 
   else {
