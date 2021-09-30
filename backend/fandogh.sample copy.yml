@@ -1,0 +1,23 @@
+kind: ExternalService
+name: shahed=class-bot
+spec:
+  image: scb:0.1
+  port: 3000
+
+  env:
+  - name: MONGODBUSER
+    value: MONGODBUSER
+  
+  - name: MONGODBPASS
+    value: MONGODBPASS
+  
+  - name: SECRETKEY
+    value: SECRETKEY
+
+  - name: TGTOKEN
+    value: TGTOKEN
+
+  - name: GROUPCHATID
+    value: GROUPCHATID
+
+    

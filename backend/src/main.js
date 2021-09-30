@@ -89,7 +89,6 @@ function checkSecretKey(next) {
 }
 
 app.get('/', (req, res) => {
-  console.log('yo');
   res.sendFile(path.join(__dirname, 'dist', '/page.html'));
 })
 
@@ -139,7 +138,7 @@ app.listen(3000, async () => {
 
 // telegram bot -------------------------
 function send2Group(msg) {
-  // bot.sendMessage(GROUP_CHATID, msg)
+  bot.sendMessage(GROUP_CHATID, msg)
 }
 
 bot.on("message", (msg) => {

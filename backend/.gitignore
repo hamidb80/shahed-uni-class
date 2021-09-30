@@ -1,2 +1,4 @@
 dist/*
 !dist/page.sample.html
+.fandogh
+fandogh.yml

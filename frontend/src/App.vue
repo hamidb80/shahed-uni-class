@@ -96,7 +96,7 @@ import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
 
 const httpClient = axios.create({
-  baseURL: "http://localhost:3000/api/",
+  baseURL: process.env.NODE_ENV === 'development' ? "http://localhost:3000/api/" : '/api/',
   timeout: 10 * 1000,
 });
 
