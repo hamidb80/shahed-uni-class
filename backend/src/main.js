@@ -1,64 +1,28 @@
-import { MongoClient, ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb'
 import TelegramBot from 'node-telegram-bot-api'
 import express from 'express'
 import cors from 'cors'
-import { matchesStructure } from 'validate-structure'
+import { v4 as uuidv4 } from 'uuid'
 
-const
-  MONGODB_USER = process.env.MONGODB_USER,
-  MONGODB_PASS = process.env.MONGODB_PASS
+import { TG_TOKEN } from './config.js'
+import { validateClass } from './types.js'
+import { scc, runQuery } from './db.js'
+import { updateObject } from '../utils/object.js'
 
-const
-  SECRET_KEY = process.env.SECRET_KEY,
-  uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASS}@cluster0.5ixf5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
-  GROUP_CHATID = -1001324766857
-
+// init services --------------------------
 
 const app = express()
-// const bot = new TelegramBot(process.env.TBOT_TOKEN, { polling: true })
-
 app.use(cors())
 app.use(express.json())
 app.use(express.static('./static'))
 
+const bot = new TelegramBot(TG_TOKEN, { polling: true })
+
+// app data ------------------------------------
 
 let
   classes = {}, // class_id => class
   program = [] // array of day | day is array of time | time is array of class_ids
-
-
-const
-  mdb = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true }),
-  scc = mdb.db("shahed").collection("classes") // shahed class collection
-
-async function runQuery(fn) {
-  await mdb.connect().catch(console.log)
-  let res = await fn()
-  mdb.close()
-  return res
-}
-
-async function update() {
-  processData(
-    await runQuery(
-      async () => await scc.find().toArray()))
-}
-
-const types = {
-  Class: {
-    "teacher": "string",
-    "lesson": "string",
-    "program[7]": "Day",
-  },
-
-  Day: "number[]",
-}
-
-
-function updateObject(object, key, val) {
-  object[key] = val
-  return object
-}
 
 function resetProgram() {
   program = []
@@ -85,23 +49,26 @@ function processData(classesArray) {
   classes = classesArray.reduce((o, cls) => updateObject(o, cls["_id"], cls), {})
 }
 
-app.get('/', (req, res) => {
-  res.send("hey")
-})
+// database connection
 
-app.get('/api/getAll', async (req, res) => {
-  res.send({ classes, program })
-})
+async function updateData() {
+  processData(
+    await runQuery(
+      async () => await scc.find().toArray()))
+}
 
-app.post('/api/verify', (req, res) => {
-  res.send({ result: req.body.secretKey === SECRET_KEY })
-})
+async function upsertClass(clsObject, clsId) {
+  let result = await runQuery(
+    async () => await scc.updateOne(
+      { _id: ObjectId(clsId) },
+      { $set: clsObject }
+    ))
 
+  await updateData()
+  return result
+}
 
-app.post('/api/update', (req, res) => {
-  update()
-  res.send({ result: "ok" })
-})
+// web service --------------------------------------
 
 function checkSecretKey(next) {
   return (req, res) => {
@@ -112,35 +79,39 @@ function checkSecretKey(next) {
   }
 }
 
-function matchClass(object) {
-  return matchesStructure(object, "Class", true, types)
-}
+app.get('/', (req, res) => {
+  res.send("hey")
+})
 
-const structureErrorMessage = {
-  msg: "class structure is invalid it should be like 'types'",
-  types
-}
+app.get('/api/getAll', async (req, res) => {
+  res.send({ classes, program })
+})
+app.post('/api/update', async (req, res) => {
+  await updateData()
+  res.send({ result: "ok" })
+})
+
+app.post('/api/verify', (req, res) => {
+  res.send({ result: req.body.secretKey === SECRET_KEY })
+})
 
 app.post('/api/class', checkSecretKey(async (req, res) => {
-  if (matchClass(req.body)) {
-    let dbRes = await runQuery(async () => await scc.insertOne(req.body))
-    await update()
-    res.send(dbRes)
-  }
-  else res.status(400).send(structureErrorMessage)
+  let errors = validateClass(req.body)
+  if (errors.length === 0)
+    res.send(await upsertClass(req.body, uuidv4()))
+
+  else res.status(400).send(errors)
 }))
 app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
-  if (matchClass(req.body)) {
-    let dbRes = await runQuery(async () => await scc.updateOne({ _id: ObjectId(req.params.cid) }, { $set: req.body }))
-    await update()
-    res.send(dbRes)
-  }
-  else res.status(400).send(structureErrorMessage)
+  let errors = validateClass(req.body)
+  if (errors.length === 0)
+    res.send(await upsertClass(req.body, req.params.cid))
 
+  else res.status(400).send(errors)
 }))
 app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
   let dbRes = await runQuery(async () => await scc.deleteOne({ _id: ObjectId(req.params.cid) }))
-  await update()
+  await updateData()
   res.send(dbRes)
 }))
 
@@ -149,28 +120,27 @@ app.post('/api/bot/', checkSecretKey((req, res) => {
   res.send(req.body)
 }))
 
+
+app.listen(3000, async () => {
+  console.log('running ...')
+  await updateData()
+  runScheduler()
+})
+
+// telegram bot -------------------------
 function send2Group(msg) {
   // bot.sendMessage(GROUP_CHATID, msg)
 }
 
-app.listen(3000, () => {
-  update()
+bot.on("message", (msg) => {
+  if (msg.text === '/start')
+    bot.sendMessage(msg.chat.id, "در حال اجرا")
 })
 
+// --------------------------------
 
 function runScheduler(params) {
   return setInterval(() => {
-
     // send2Group(req.body.msg)
-
   }, 60 * 1000)
 }
-
-
-runScheduler()
-// --------------------------------
-
-// bot.on("message", (msg) => {
-//   if (msg.text === '/start')
-//     bot.sendMessage(msg.chat.id, "در حال اجرا")
-// })
