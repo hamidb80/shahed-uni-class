@@ -1,13 +1,20 @@
-import { ObjectId } from 'mongodb'
-import TelegramBot from 'node-telegram-bot-api'
 import express from 'express'
 import cors from 'cors'
-import { v4 as uuidv4 } from 'uuid'
+import TelegramBot from 'node-telegram-bot-api'
 
-import { TG_TOKEN } from './config.js'
+import { ObjectId } from 'mongodb'
+import pickRandom from 'pick-random'
+import { difference } from "set-operations"
+import moment from 'moment'
+// import {} from 'moment'
+
 import { validateClass } from './types.js'
 import { scc, runQuery } from './db.js'
-import { updateObject } from '../utils/object.js'
+import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
+import { isIn } from '../utils/array.js'
+import { modulo } from '../utils/math.js'
+
+import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 
 // init services --------------------------
 
@@ -61,7 +68,8 @@ async function upsertClass(clsObject, clsId) {
   let result = await runQuery(
     async () => await scc.updateOne(
       { _id: ObjectId(clsId) },
-      { $set: clsObject }
+      { $set: clsObject },
+      { upsert: true }
     ))
 
   await updateData()
@@ -98,7 +106,7 @@ app.post('/api/verify', (req, res) => {
 app.post('/api/class', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsertClass(req.body, uuidv4()))
+    res.send(await upsertClass(req.body, ObjectId()))
 
   else res.status(400).send(errors)
 }))
@@ -116,7 +124,7 @@ app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
 }))
 
 app.post('/api/bot/', checkSecretKey((req, res) => {
-  // send2Group( req.body.msg)
+  send2Group(req.body.msg)
   res.send(req.body)
 }))
 
@@ -129,18 +137,100 @@ app.listen(3000, async () => {
 
 // telegram bot -------------------------
 function send2Group(msg) {
-  // bot.sendMessage(GROUP_CHATID, msg)
+  bot.sendMessage(GROUP_CHATID, msg)
 }
 
 bot.on("message", (msg) => {
   if (msg.text === '/start')
-    bot.sendMessage(msg.chat.id, "در حال اجرا")
+    bot.sendMessage(msg.chat.id, pickRandom([
+      "عهههههه دارم کار میکنم",
+      "چییییههه؟",
+      "شما امر بفرما",
+      "حواسمو پرت نکن",
+      "ساکت لطفا",
+    ])[0])
 })
 
 // --------------------------------
 
-function runScheduler(params) {
-  return setInterval(() => {
-    // send2Group(req.body.msg)
-  }, 60 * 1000)
+const classStartTimes = [
+  [8, 0],
+  [9, 30],
+  [11, 0],
+  [13, 30],
+  [15, 0],
+  [16, 30],
+  [18, 0],
+  [19, 30],
+]
+
+function isAfter(myTime, compareTime) { // times are given as arrays
+  if (myTime[0] === compareTime[0])
+    return myTime[1] >= compareTime[1]
+
+  return myTime[0] >= compareTime[0]
+}
+
+function getCurrentTimeInfo() {
+  const now = moment()
+  return {
+    dayIndex: modulo(now.weekday() + 1, 7),
+    timeArr: [now.hours(), now.minute()]
+  }
+}
+
+function getClassTimeIndex(timeArr) {
+  let classTimeIndex = -1
+
+  for (let i = 0; i < classStartTimes.length; i++) {
+    if (isAfter(timeArr, classStartTimes[i]))
+      classTimeIndex = i
+    else
+      return classTimeIndex
+  }
+
+  return classStartTimes.length
+}
+
+let
+  lastClassTimeIndex = -1,
+  lastClassIds = []
+
+function task() {
+  console.log('check')
+
+  const time = getCurrentTimeInfo()
+  let newClassTimeIndex = getClassTimeIndex(time.timeArr)
+
+  if (isIn(newClassTimeIndex, [-1, classStartTimes.length]))
+    lastClassIds = []
+
+  else {
+    let newClassIds = objectMap2Array(
+      objecFilter(
+        classes,
+        (_, cls) => cls.program[time.dayIndex].includes(newClassTimeIndex)
+      ),
+      (id, cls) => id)
+
+    for (const clsId of difference(newClassIds, lastClassIds)) {
+      const cls = classes[clsId]
+      send2Group([
+        "کلاس درس",
+        cls["lesson"],
+        "با استاد",
+        cls["teacher"],
+        "در حال برگزاری است",
+      ].join(' '))
+    }
+
+    lastClassIds = newClassIds
+  }
+
+  lastClassTimeIndex = newClassTimeIndex
+}
+
+function runScheduler() {
+  task()
+  return setInterval(task, 10 * 1000)
 }
