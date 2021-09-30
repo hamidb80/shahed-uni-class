@@ -96,7 +96,11 @@ import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
 
 const httpClient = axios.create({
-  baseURL: process.env.NODE_ENV === 'development' ? "http://localhost:3000/api/" : '/api/',
+  baseURL:
+    process.env.NODE_ENV === "development"
+      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
+      : // ? "http://localhost:3000/api/"
+        "/api/",
   timeout: 10 * 1000,
 });
 
@@ -237,6 +241,7 @@ export default class App extends Vue {
       .class,
       .text {
         .fa();
+        text-align: center;
       }
 
       &.day,
@@ -281,12 +286,6 @@ export default class App extends Vue {
       }
     }
 
-    &.times {
-      .cell {
-        width: 100px;
-      }
-    }
-
     &:nth-child(even) {
       .cell {
         background-color: #f3f3f3;
@@ -307,15 +306,32 @@ export default class App extends Vue {
 
     &.times {
       .cell {
+        width: 100px;
         color: white;
         font-weight: bold;
         background-color: #212121;
 
         border-top-color: #565656;
         border-bottom-color: #565656;
+        direction: ltr;
+      }
+      .text {
+        direction: ltr;
       }
       .corner {
         background-color: transparent;
+      }
+    }
+
+    @media screen and (max-width: 500px) {
+      .cell {
+        height: 56px;
+        max-width: 100px;
+
+        .text,
+        .class {
+          font-size: 15px;
+        }
       }
     }
   }
@@ -371,6 +387,8 @@ export default class App extends Vue {
 
 .forms {
   z-index: 2;
+  max-height: 90%;
+  overflow-y: scroll;
   width: 70%;
   padding-top: 30px;
   padding-bottom: 50px;
@@ -386,14 +404,41 @@ export default class App extends Vue {
   }
 
   .form {
-    header {
-      text-align: center;
-      .fa();
-      font-size: 26px;
-    }
-
     display: flex;
     flex-direction: column;
+
+    header {
+      text-align: center;
+      font-size: 26px;
+      .fa();
+    }
+
+    .days {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      .my(40px);
+
+      .day {
+        border-radius: 4px;
+        width: 80px;
+        text-align: center;
+        .fa();
+        .px(8px);
+        .py(2px);
+        .mx(-16px);
+        font-size: 16px;
+        transform: rotate(90deg);
+        color: #424242;
+        background-color: #eee;
+        cursor: pointer;
+
+        &.active {
+          color: white;
+          background-color: tomato;
+        }
+      }
+    }
 
     .class-time-settings {
       display: flex;
@@ -442,33 +487,6 @@ export default class App extends Vue {
       }
     }
 
-    .days {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: space-between;
-      .my(40px);
-
-      .day {
-        border-radius: 4px;
-        width: 80px;
-        text-align: center;
-        .fa();
-        .px(8px);
-        .py(2px);
-        .mx(-16px);
-        font-size: 16px;
-        transform: rotate(90deg);
-        color: #424242;
-        background-color: #eee;
-        cursor: pointer;
-
-        &.active {
-          color: white;
-          background-color: tomato;
-        }
-      }
-    }
-
     input {
       padding: 10px;
       border-radius: 4px;
@@ -496,6 +514,38 @@ export default class App extends Vue {
       &:hover {
         background-color: transparent;
         color: tomato;
+      }
+    }
+  }
+
+  @media screen and (max-width: 500px) {
+    width: 100%;
+
+    .form {
+      flex-direction: column;
+
+      input{
+        .px(6px);
+        .py(4px);
+        font-size: 16px;
+      }
+
+      .days {
+        .day {
+          width: 128px;
+          .py(2px);
+          font-size: 14px;
+        }
+      }
+
+      .class-time-settings {
+        .day {
+          flex-direction: column;
+          .name {
+            text-align: center;
+            .my(6px);
+          }
+        }
       }
     }
   }
