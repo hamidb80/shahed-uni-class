@@ -117,16 +117,21 @@ export default {
 
       let i = this.selectedDays.findIndex((d) => d === di);
 
-      if (i === -1) this.selectedDays.push(di);
-      else this.selectedDays.splice(i, 1);
+      if (i === -1) {
+        this.selectedDays.push(di);
+        this.selectedDays.sort();
+      } else {
+        this.selectedDays.splice(i, 1);
+      }
     },
     toggleTime(di, ti) {
       if (!this.isAdmin) return;
 
       let i = this.program[di].findIndex((v) => v === ti);
 
-      if (i === -1) this.program[di].push(ti);
-      else this.program[di].splice(i, 1);
+      if (i === -1) {
+        this.program[di].push(ti);
+      } else this.program[di].splice(i, 1);
     },
 
     handleSubmit() {
