@@ -113,6 +113,7 @@ export default {
     },
 
     toggleDay(di) {
+      // di => day index
       if (!this.isAdmin) return;
 
       let i = this.selectedDays.findIndex((d) => d === di);
@@ -122,16 +123,17 @@ export default {
         this.selectedDays.sort();
       } else {
         this.selectedDays.splice(i, 1);
+        this.program[di] = [];
       }
     },
     toggleTime(di, ti) {
+      // di => day index , ti => time index
       if (!this.isAdmin) return;
 
       let i = this.program[di].findIndex((v) => v === ti);
 
-      if (i === -1) {
-        this.program[di].push(ti);
-      } else this.program[di].splice(i, 1);
+      if (i === -1) this.program[di].push(ti);
+      else this.program[di].splice(i, 1);
     },
 
     handleSubmit() {
