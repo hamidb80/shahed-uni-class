@@ -319,7 +319,7 @@ export default {
       }
     }
 
-    @media screen and (max-width: 500px) {
+    @media screen and (max-width: @mobile-width) {
       .cell {
         height: 56px;
         max-width: 100px;
@@ -399,156 +399,8 @@ export default {
     font-size: 18px;
   }
 
-  .form {
-    display: flex;
-    flex-direction: column;
-
-    header {
-      text-align: center;
-      font-size: 26px;
-      .fa();
-    }
-
-    .days {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: space-between;
-      .my(40px);
-
-      .day {
-        border-radius: 4px;
-        width: 80px;
-        text-align: center;
-        .fa();
-        .px(8px);
-        .py(2px);
-        .mx(-16px);
-        font-size: 16px;
-        transform: rotate(90deg);
-        color: #424242;
-        background-color: #eee;
-        cursor: pointer;
-
-        &.active {
-          color: white;
-          background-color: tomato;
-        }
-      }
-    }
-
-    .class-time-settings {
-      display: flex;
-      flex-direction: column;
-
-      .day {
-        display: flex;
-        flex-direction: row-reverse;
-        border-top: 1px solid #eee;
-        align-items: center;
-
-        .name {
-          .fa();
-          width: 160px;
-          text-align: right;
-        }
-
-        .times {
-          flex-grow: 1;
-          flex-wrap: wrap;
-          display: inline-flex;
-          flex-direction: row;
-
-          .time {
-            .mx(6px);
-            .my(4px);
-            border-radius: 4px;
-            background-color: #eee;
-            color: #212121;
-            .fa();
-            cursor: pointer;
-            padding: 6px 12px;
-
-            &:first-child {
-              margin-left: 0;
-            }
-            &:last-child {
-              margin-right: 0;
-            }
-            &.active {
-              color: white;
-              background-color: tomato;
-            }
-          }
-        }
-      }
-    }
-
-    input {
-      padding: 10px;
-      border-radius: 4px;
-      .fa();
-      direction: rtl;
-      border: 2px solid #565656;
-      outline: none;
-      font-size: 18px;
-    }
-
-    .btn {
-      border-radius: 4px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      .px(16px);
-      .py(6px);
-      border: 2px solid tomato;
-      background-color: tomato;
-      color: white;
-      .fa();
-      font-size: 18px;
-
-      &:hover {
-        background-color: transparent;
-        color: tomato;
-      }
-    }
-  }
-
-  @media screen and (max-width: 500px) {
+  @media screen and (max-width: @mobile-width) {
     width: 100%;
-
-    .form {
-      flex-direction: column;
-
-      input{
-        .px(6px);
-        .py(4px);
-        font-size: 16px;
-      }
-
-      .days {
-        .day {
-          width: 128px;
-          .py(2px);
-          font-size: 14px;
-        }
-      }
-
-      .class-time-settings {
-        .day {
-          flex-direction: column;
-          
-          .name {
-            text-align: center;
-            .my(6px);
-          }
-
-          .times{
-            justify-content: center;
-          }
-        }
-      }
-    }
   }
 }
 </style>

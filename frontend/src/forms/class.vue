@@ -144,6 +144,101 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
+@import url("../styles/form.less");
+.form {
+  .days {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    .my(40px);
+
+    .day {
+      border-radius: 4px;
+      width: 80px;
+      text-align: center;
+      .fa();
+      .px(8px);
+      .py(2px);
+      .mx(-16px);
+      font-size: 16px;
+      transform: rotate(90deg);
+      color: #424242;
+      background-color: #eee;
+      cursor: pointer;
+
+      &.active {
+        color: white;
+        background-color: tomato;
+      }
+    }
+  }
+
+  .class-time-settings {
+    display: flex;
+    flex-direction: column;
+
+    .day {
+      display: flex;
+      flex-direction: row-reverse;
+      border-top: 1px solid #eee;
+      align-items: center;
+
+      .name {
+        .fa();
+        width: 160px;
+        text-align: right;
+      }
+
+      .times {
+        flex-grow: 1;
+        flex-wrap: wrap;
+        display: inline-flex;
+        flex-direction: row;
+
+        .time {
+          .mx(6px);
+          .my(4px);
+          border-radius: 4px;
+          background-color: #eee;
+          color: #212121;
+          .fa();
+          direction: ltr;
+          cursor: pointer;
+          padding: 6px 12px;
+
+          &.active {
+            color: white;
+            background-color: tomato;
+          }
+        }
+      }
+    }
+  }
+
+  @media screen and (max-width: @mobile-width) {
+    .days {
+      .day {
+        width: 128px;
+        .py(2px);
+        font-size: 14px;
+      }
+    }
+
+    .class-time-settings {
+      .day {
+        flex-direction: column;
+
+        .name {
+          text-align: center;
+          .my(6px);
+        }
+
+        .times {
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
 </style>

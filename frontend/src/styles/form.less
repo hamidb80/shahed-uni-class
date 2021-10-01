@@ -1,0 +1,54 @@
+@import url('./global.less');
+
+.form {
+  display: flex;
+  flex-direction: column;
+
+  header {
+    text-align: center;
+    font-size: 26px;
+    .fa();
+  }
+
+  input {
+    padding: 10px;
+    border-radius: 4px;
+    .fa();
+    direction: rtl;
+    border: 2px solid #565656;
+    outline: none;
+    font-size: 18px;
+  }
+
+  .btn {
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    .px(16px);
+    .py(6px);
+    border: 2px solid tomato;
+    background-color: tomato;
+    color: white;
+    .fa();
+    font-size: 18px;
+
+    &:hover {
+      background-color: transparent;
+      color: tomato;
+    }
+  }
+}
+
+@media screen and (max-width: @mobile-width) {
+  .form {
+    flex-direction: column;
+
+    input {
+      .px(6px);
+      .py(4px);
+      font-size: 16px;
+    }
+  }
+}

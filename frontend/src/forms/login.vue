@@ -24,4 +24,5 @@ export default {
 </script>
 
 <style scoped lang="less">
+@import url('../styles/form.less');
 </style>
