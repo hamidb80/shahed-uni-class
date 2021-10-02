@@ -145,20 +145,34 @@ function send2Group(msg) {
 }
 
 bot.on("message", (msg) => {
-  const cid = msg.chat.id
+  function send(text) {
+    bot.sendMessage(msg.chat.id, text)
+  }
 
-  if (msg.text === '/start')
-    bot.sendMessage(cid, pickRandom([
-      "عهههههه دارم کار میکنم",
-      "چییییههه؟",
+  if (msg.text.startsWith('/start'))
+    send([
+      "دستورات:",
+      "\n\n",
+      "/check",
+      "بررسی وضعیت",
+      "\n\n",
+      "/classes",
+      "کلاس های در حال برگزاری",
+    ].join(' '))
+
+  else if (msg.text.startsWith('/check'))
+    send(pickRandom([
+      "جانم فدایتان اعلی حضرت",
       "شما امر بفرما",
       "حواسمو پرت نکن",
+      "عهههههه دارم کار میکنم",
+      "چییییههه؟",
       "ساکت لطفا",
     ])[0])
 
-  else if (msg.text === '/classes') {
-    let currentClasses = nowClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
-    bot.sendMessage(cid, [
+  else if (msg.text.startsWith('/classes') ){
+    let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
+    send([
       "هم اکنون",
       currentClasses.length,
       "کلاس در حال برگزاری است",
@@ -183,7 +197,7 @@ function getClassShortInfo(cls) {
   ].join(' ')
 }
 
-function nowClassIds(now) {
+function currentClassIds(now) {
   let classTimeIndex = getClassTimeIndex(now.mtime, classTimes)
 
   return objectMap2Array(
@@ -195,9 +209,9 @@ function nowClassIds(now) {
 }
 
 function task() {
-  console.log('check')
+  console.log('task')
 
-  let newClassIds = nowClassIds(getCurrentWeekTimeInfo())
+  let newClassIds = currentClassIds(getCurrentWeekTimeInfo())
 
   for (const clsId of difference(newClassIds, lastClassIds)) {
     const cls = classes[clsId]
