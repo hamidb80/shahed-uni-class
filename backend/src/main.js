@@ -11,7 +11,7 @@ import moment from 'moment'
 import { validateClass } from './types.js'
 import { scc, runQuery } from './db.js'
 import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
-import { modulo } from '../utils/math.js'
+import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 
@@ -145,93 +145,69 @@ function send2Group(msg) {
 }
 
 bot.on("message", (msg) => {
+  const cid = msg.chat.id
+
   if (msg.text === '/start')
-    bot.sendMessage(msg.chat.id, pickRandom([
+    bot.sendMessage(cid, pickRandom([
       "عهههههه دارم کار میکنم",
       "چییییههه؟",
       "شما امر بفرما",
       "حواسمو پرت نکن",
       "ساکت لطفا",
     ])[0])
+
+  else if (msg.text === '/classes') {
+    let currentClasses = nowClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
+    bot.sendMessage(cid, [
+      "هم اکنون",
+      currentClasses.length,
+      "کلاس در حال برگزاری است",
+      "\n\n-----------------------\n",
+      "کلاس ها:",
+      currentClasses.map(getClassShortInfo).join("\n")
+    ].join(' '))
+  }
 })
 
 // --------------------------------
 
-const classStartTimes = [
-  [8, 0],
-  [9, 30],
-  [11, 0],
-  [13, 30],
-  [15, 0],
-  [16, 30],
-  [18, 0],
-  [19, 30],
-]
 
-function isAfter(myTime, compareTime) { // times are given as arrays
-  if (myTime[0] === compareTime[0])
-    return myTime[1] >= compareTime[1]
+let lastClassIds = []
 
-  return myTime[0] >= compareTime[0]
+function getClassShortInfo(cls) {
+  return [
+    "کلاس درس",
+    cls["lesson"],
+    "با استاد",
+    cls["teacher"]
+  ].join(' ')
 }
 
-function getCurrentTimeInfo() {
-  const now = moment()
-  return {
-    dayIndex: modulo(now.weekday() + 1, 7),
-    timeArr: [now.hours(), now.minute()]
-  }
+function nowClassIds(now) {
+  let classTimeIndex = getClassTimeIndex(now.mtime, classTimes)
+
+  return objectMap2Array(
+    objecFilter(
+      classes,
+      (_, cls) => cls.program[now.dayIndex].includes(classTimeIndex)
+    ),
+    (id, cls) => id)
 }
-
-function getClassTimeIndex(timeArr) {
-  let classTimeIndex = -1
-
-  for (let i = 0; i < classStartTimes.length; i++) {
-    if (isAfter(timeArr, classStartTimes[i]))
-      classTimeIndex = i
-    else
-      return classTimeIndex
-  }
-
-  return classStartTimes.length - 1
-}
-
-let
-  lastClassTimeIndex = -1,
-  lastClassIds = []
 
 function task() {
   console.log('check')
 
-  const time = getCurrentTimeInfo()
-  let newClassTimeIndex = getClassTimeIndex(time.timeArr)
+  let newClassIds = nowClassIds(getCurrentWeekTimeInfo())
 
-  if ([-1, classStartTimes.length - 1].includes(newClassTimeIndex))
-    lastClassIds = []
-
-  else {
-    let newClassIds = objectMap2Array(
-      objecFilter(
-        classes,
-        (_, cls) => cls.program[time.dayIndex].includes(newClassTimeIndex)
-      ),
-      (id, cls) => id)
-
-    for (const clsId of difference(newClassIds, lastClassIds)) {
-      const cls = classes[clsId]
-      send2Group([
-        "کلاس درس",
-        cls["lesson"],
-        "با استاد",
-        cls["teacher"],
-        "در حال برگزاری است",
-      ].join(' '))
-    }
-
-    lastClassIds = newClassIds
+  for (const clsId of difference(newClassIds, lastClassIds)) {
+    const cls = classes[clsId]
+    send2Group([
+      getClassShortInfo(cls),
+      "در حال برگزاری است",
+    ].join(' '))
   }
 
-  lastClassTimeIndex = newClassTimeIndex
+  lastClassIds = newClassIds
 }
 
 function runScheduler() {
