@@ -28,7 +28,11 @@
         </div>
       </div>
 
-      <div class="column" v-for="(day, di) in program" :key="di">
+      <div
+        :class="['column', `max-classes-${maxDaysClasses[di]}`]"
+        v-for="(day, di) in program"
+        :key="di"
+      >
         <div class="day cell">
           <span class="text">
             {{ weekDays[di] }}
@@ -97,8 +101,8 @@ import classF from "./forms/class.vue";
 const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
-      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/" :
-      // ? "http://localhost:3000/api/" :
+      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
+      : // ? "http://localhost:3000/api/" :
         "/api/",
   timeout: 10 * 1000,
 });
@@ -128,6 +132,8 @@ export default {
 
     classes: {}, // classId => class{teacher, lesson, program}
     program: [],
+
+    maxDaysClasses: [], // array of int
 
     loading: false,
   }),
@@ -189,6 +195,10 @@ export default {
       this.classes = res.data.classes;
       this.program = res.data.program;
 
+      this.maxDaysClasses = this.program.map((dayProgram) =>
+        Math.max(...dayProgram.map((time) => time.length))
+      );
+
       this.loading = false;
     },
   },
@@ -196,11 +206,16 @@ export default {
   mounted() {
     this.update();
   },
-}
+};
 </script>
 
 <style lang="less">
 @import url("./styles/global.less");
+
+@mobile-column-width: 84px;
+@mobile-column-step: 24px;
+@desktop-column-width: 128px;
+@desktop-column-step: 36px;
 
 .app-header {
   color: #424242;
@@ -219,19 +234,22 @@ export default {
 
 .table.program {
   display: flex;
-  max-width: 100%;
+  max-width: 100vw;
   overflow-x: scroll;
+  white-space: nowrap;
 
   .column {
-    display: flex;
+    display: inline-flex;
+    flex-shrink: 0;
     flex-direction: column;
+    white-space: normal;
 
     .cell {
       display: flex;
       align-items: center;
       justify-content: center;
       border: 0.5px solid #aaa;
-      width: 200px;
+      width: 100%;
       height: 80px;
 
       .class,
@@ -301,8 +319,9 @@ export default {
     }
 
     &.times {
+      width: 100px;
+
       .cell {
-        width: 100px;
         color: white;
         font-weight: bold;
         background-color: #212121;
@@ -319,10 +338,35 @@ export default {
       }
     }
 
+    &.max-classes-0 {
+      width: @desktop-column-width;
+    }
+    &.max-classes-1 {
+      width: @desktop-column-width + @desktop-column-step;
+    }
+    &.max-classes-2 {
+      width: @desktop-column-width + 2 * @desktop-column-step;
+    }
+    &.max-classes-3 {
+      width: @desktop-column-width + 3 * @desktop-column-step;
+    }
+
     @media screen and (max-width: @mobile-width) {
+      &.max-classes-0 {
+        width: @mobile-column-width + @mobile-column-step;
+      }
+      &.max-classes-1 {
+        width: @mobile-column-width + @mobile-column-step;
+      }
+      &.max-classes-2 {
+        width: @mobile-column-width + 2 * @mobile-column-step;
+      }
+      &.max-classes-3 {
+        width: @mobile-column-width + 3 * @mobile-column-step;
+      }
+
       .cell {
         height: 56px;
-        max-width: 100px;
 
         .text,
         .class {
