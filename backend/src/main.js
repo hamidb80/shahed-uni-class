@@ -155,7 +155,7 @@ bot.on("message", (msg) => {
       "\n\n",
       "/check",
       "بررسی وضعیت",
-      "\n\n",
+      "\n",
       "/classes",
       "کلاس های در حال برگزاری",
     ].join(' '))
@@ -178,6 +178,7 @@ bot.on("message", (msg) => {
       "کلاس در حال برگزاری است",
       "\n\n-----------------------\n",
       "کلاس ها:",
+      "\n",
       currentClasses.map(getClassShortInfo).join("\n")
     ].join(' '))
   }
