@@ -179,7 +179,7 @@ bot.on("message", (msg) => {
       "\n\n-----------------------\n",
       "کلاس ها:",
       "\n",
-      currentClasses.map(getClassShortInfo).join("\n")
+      currentClasses.map((cls, i) => `\n${i+1} -> ${getClassShortInfo(cls)}`).join("\n")
     ].join(' '))
   }
 })
@@ -191,9 +191,9 @@ let lastClassIds = []
 
 function getClassShortInfo(cls) {
   return [
-    "کلاس درس",
+    "کلاس",
     cls["lesson"],
-    "با استاد",
+    "با",
     cls["teacher"]
   ].join(' ')
 }
