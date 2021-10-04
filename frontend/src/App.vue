@@ -38,11 +38,7 @@
             {{ weekDays[di] }}
           </span>
         </div>
-        <div
-          :class="['time', 'cell', `size-${time.length}`]"
-          v-for="(time, ti) in day"
-          :key="ti"
-        >
+        <div class="time cell" v-for="(time, ti) in day" :key="ti">
           <template v-if="time.length">
             <div
               class="class"
@@ -213,7 +209,7 @@ export default {
 @import url("./styles/global.less");
 
 @mobile-column-width: 84px;
-@mobile-column-step: 24px;
+@mobile-column-step: 56px;
 @desktop-column-width: 128px;
 @desktop-column-step: 36px;
 
@@ -274,28 +270,24 @@ export default {
         height: 100%;
         flex-grow: 1;
         display: flex;
+        padding: 4px;
         justify-content: center;
         align-items: center;
         cursor: pointer;
 
+        border: 0.5px solid #aaa;
+        border-bottom: none;
+        border-top: none;
+
+        &:first-child {
+          border-left: none;
+        }
+        &:last-child {
+          border-right: none;
+        }
+
         &:hover {
           background-color: #ffecc8;
-        }
-      }
-
-      &.size-2,
-      &.size-3 {
-        .class {
-          border: 0.5px solid #aaa;
-          border-bottom: none;
-          border-top: none;
-
-          &:first-child {
-            border-left: none;
-          }
-          &:last-child {
-            border-right: none;
-          }
         }
       }
     }
