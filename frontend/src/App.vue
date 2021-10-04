@@ -4,6 +4,7 @@
       <div class="forms" v-if="form && showMenu">
         <div v-if="loading" class="loading">صبر کنید ...</div>
         <login-form v-else-if="form === 'login'" @submit="login" />
+        <telegram-form v-else-if="form === 'telegram'"/>
         <class-form
           v-else-if="form === 'class'"
           :data="selectedClassId ? classes[selectedClassId] : {}"
@@ -76,6 +77,11 @@
               <loginI class="icon" />
             </div>
           </template>
+         <template v-if="isVerifed">
+            <div class="btn"  @click="changeForm('telegram')">
+              <telegram class="icon" />
+            </div>
+          </template>
         </template>
       </div>
     </footer>
@@ -90,9 +96,11 @@ import loginI from "./icons/vue/login.vue";
 import moreI from "./icons/vue/more.vue";
 import schoolI from "./icons/vue/school.vue";
 import closeI from "./icons/vue/close.vue";
+import telegram from "./icons/vue/telegram.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
+import telegramF from "./forms/telegram.vue";
 
 const httpClient = axios.create({
   baseURL:
@@ -110,9 +118,11 @@ export default {
     moreI,
     schoolI,
     closeI,
+    telegram,
 
     "class-form": classF,
     "login-form": loginF,
+    "telegram-form": telegramF,
   },
 
   data: () => ({
