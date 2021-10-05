@@ -1,4 +1,3 @@
-import { fn } from 'moment'
 import { MongoClient, ObjectId } from 'mongodb'
 import { MONGODB_CONNECTION_URI } from './config.js'
 
@@ -12,7 +11,7 @@ export const
 
   COLLECTIONS = {
     classes: "classes",
-    trainings: "trainings"
+    events: "events"
   }
 
 export async function runQuery(fn) {

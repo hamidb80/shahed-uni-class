@@ -1,6 +1,7 @@
 import { validateStructure, buildError } from 'validate-structure'
 
 export const types = {
+  Day: "number[]",
   Class: {
     "teacher": "string",
     "lesson": "string",
@@ -8,30 +9,23 @@ export const types = {
     "program[7]": "Day",
   },
 
-  Day: "number[]",
-
-  Training: {
+  Event: {
     "name": "string",
-    "classId": "string",
+    "type": "string",
+    "classId?": "string",
     "description": "string",
-    "end": DateTimeValiator, // time
+    "datetime": DateTimeValiator, // time
   },
 }
 
 function DateTimeValiator(val) {
-  if (true) {
-    return []
-  }
-  else {
-    return buildError(`'${val}' does not start with a '$'`, path)
-  }
+  return []
+  return buildError(`'${val}' does not start with a '$'`)
 }
 
-
-export function validateClass(object) {
+export function ClassValidator(object) {
   return validateStructure(object, "Class", true, types)
 }
-
-export function validateTraining(object) {
-  return validateStructure(object, "Training", true, types)
+export function EventValidator(object) {
+  return validateStructure(object, "Event", true, types)
 }

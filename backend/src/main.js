@@ -84,21 +84,20 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', '/page.html'))
 })
 
-
 app.get('/api/now', (req, res) => {
   res.send(moment().format())
 })
 app.get('/api/getAll', async (req, res) => {
   res.send({ classes, program, trainings })
 })
-app.post('/api/update', async (req, res) => {
-  await updateData()
-  res.send({ result: "ok" })
-})
 
 app.post('/api/verify', (req, res) => {
   res.send({ result: req.body.secretKey === SECRET_KEY })
 })
+app.post('/api/update', checkSecretKey(async (req, res) => {
+  await updateData()
+  res.send({ result: "ok" })
+}))
 
 app.post('/api/class', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
@@ -156,11 +155,11 @@ bot.on("message", (msg) => {
     send([
       "دستورات:",
       "\n\n",
-      "/check",
-      "بررسی وضعیت",
-      "\n",
-      "/classes",
-      "کلاس های در حال برگزاری",
+      [
+        ["/check", "بررسی وضعیت"],
+        ["/classes", "کلاس های در حال برگزاری"],
+        ["/trainings", "تمرین ها"]
+      ].map(arr => arr.join('  ')).join("\n"),
     ].join(' '))
 
   else if (msg.text.startsWith('/check'))
@@ -176,14 +175,24 @@ bot.on("message", (msg) => {
   else if (msg.text.startsWith('/classes')) {
     let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
     send([
-      "هم اکنون",
-      currentClasses.length,
-      "کلاس در حال برگزاری است",
-      "\n\n-----------------------\n",
-      "کلاس ها:",
-      "\n",
+      [
+        "هم اکنون",
+        currentClasses.length,
+        "کلاس در حال برگزاری است",
+      ].join(' '),
+      "-----------------------",
+      "کلاس ها",
       currentClasses.map((cls, i) => `\n${i + 1} -> ${getClassShortInfo(cls)}`).join("\n")
-    ].join(' '))
+    ].join('\n'))
+  }
+
+  else if (msg.text.startsWith('/trainings')) {
+    send([
+      "تمرینات",
+      "----------------------------",
+      "\n",
+      trainings.map(JSON.stringify).join("\n")
+    ].join("\n"))
   }
 })
 
