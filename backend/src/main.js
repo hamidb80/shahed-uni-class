@@ -7,7 +7,7 @@ import pickRandom from 'pick-random'
 import { difference } from "set-operations"
 import moment from 'moment'
 
-import { validateClass, validateTraining } from './types.js'
+import { validateClass, validateEvent } from './types.js'
 import { db, COLLECTIONS, runQuery, upsert, remove } from './db.js'
 import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
@@ -65,7 +65,7 @@ async function updateData() {
       async () => await db.collection(COLLECTIONS.classes).find().toArray()),
 
     await runQuery(
-      async () => await db.collection(COLLECTIONS.trainings).find().toArray())
+      async () => await db.collection(COLLECTIONS.events).find().toArray())
   )
 }
 
@@ -117,22 +117,22 @@ app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
   res.send(await remove(COLLECTIONS.classes, req.params.cid, updateData))
 }))
 
-app.post('/api/training', checkSecretKey(async (req, res) => {
-  let errors = validateTraining(req.body)
+app.post('/api/event', checkSecretKey(async (req, res) => {
+  let errors = validateEvent(req.body)
   if (errors.length === 0)
-    res.send(await upsert(COLLECTIONS.trainings, req.body, undefined, updateData))
+    res.send(await upsert(COLLECTIONS.events, req.body, undefined, updateData))
   else
     res.status(400).send(errors)
 }))
-app.put('/api/training/:tid', checkSecretKey(async (req, res) => {
-  let errors = validateTraining(req.body)
+app.put('/api/event/:evid', checkSecretKey(async (req, res) => {
+  let errors = validateEvent(req.body)
   if (errors.length === 0)
-    res.send(await upsert(COLLECTIONS.trainings, req.body, req.params.tid, updateData))
+    res.send(await upsert(COLLECTIONS.events, req.body, req.params.evid, updateData))
   else
     res.status(400).send(errors)
 }))
-app.delete('/api/training/:tid', checkSecretKey(async (req, res) => {
-  res.send(await remove(COLLECTIONS.trainings, req.params.tid, updateData))
+app.delete('/api/event/:evid', checkSecretKey(async (req, res) => {
+  res.send(await remove(COLLECTIONS.events, req.params.evid, updateData))
 }))
 
 // telegram bot -------------------------

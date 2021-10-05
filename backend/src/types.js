@@ -23,9 +23,9 @@ function DateTimeValiator(val) {
   return buildError(`'${val}' does not start with a '$'`)
 }
 
-export function ClassValidator(object) {
+export function validateClass(object) {
   return validateStructure(object, "Class", true, types)
 }
-export function EventValidator(object) {
+export function validateEvent(object) {
   return validateStructure(object, "Event", true, types)
 }
