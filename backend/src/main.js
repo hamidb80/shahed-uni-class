@@ -3,13 +3,12 @@ import cors from 'cors'
 import TelegramBot from 'node-telegram-bot-api'
 import path from 'path'
 
-import { ObjectId } from 'mongodb'
 import pickRandom from 'pick-random'
 import { difference } from "set-operations"
 import moment from 'moment'
 
-import { validateClass } from './types.js'
-import { scc, runQuery } from './db.js'
+import { validateClass, validateTraining } from './types.js'
+import { db, COLLECTIONS, runQuery, upsert, remove } from './db.js'
 import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
 
@@ -29,6 +28,7 @@ const bot = new TelegramBot(TG_TOKEN, { polling: true })
 
 let
   classes = {}, // class_id => class
+  trainings = [], // 
   program = [] // array of day | day is array of time | time is array of class_ids
 
 function resetProgram() {
@@ -41,7 +41,7 @@ function resetProgram() {
   }
 }
 
-function processData(classesArray) {
+function processData(classesArray, trainingsArray) {
   resetProgram()
 
   for (let di = 0; di < 7; di++) { // day index
@@ -54,26 +54,19 @@ function processData(classesArray) {
   }
 
   classes = classesArray.reduce((o, cls) => updateObject(o, cls["_id"], cls), {})
+  trainings = trainingsArray
 }
 
-// database connection
+// ------------------- database 
 
 async function updateData() {
   processData(
     await runQuery(
-      async () => await scc.find().toArray()))
-}
+      async () => await db.collection(COLLECTIONS.classes).find().toArray()),
 
-async function upsertClass(clsObject, clsId) {
-  let result = await runQuery(
-    async () => await scc.updateOne(
-      { _id: ObjectId(clsId) },
-      { $set: clsObject },
-      { upsert: true }
-    ))
-
-  await updateData()
-  return result
+    await runQuery(
+      async () => await db.collection(COLLECTIONS.trainings).find().toArray())
+  )
 }
 
 // web service --------------------------------------
@@ -96,7 +89,7 @@ app.get('/api/now', (req, res) => {
   res.send(moment().format())
 })
 app.get('/api/getAll', async (req, res) => {
-  res.send({ classes, program })
+  res.send({ classes, program, trainings })
 })
 app.post('/api/update', async (req, res) => {
   await updateData()
@@ -110,36 +103,46 @@ app.post('/api/verify', (req, res) => {
 app.post('/api/class', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsertClass(req.body, ObjectId()))
-
-  else res.status(400).send(errors)
+    res.send(await upsertClass(COLLECTIONS.classes, req.body, undefined, updateData))
+  else
+    res.status(400).send(errors)
 }))
 app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsertClass(req.body, req.params.cid))
-
-  else res.status(400).send(errors)
+    res.send(await upsertClass(COLLECTIONS.classes, req.body, req.params.cid, updateData))
+  else
+    res.status(400).send(errors)
 }))
 app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
-  let dbRes = await runQuery(async () => await scc.deleteOne({ _id: ObjectId(req.params.cid) }))
-  await updateData()
-  res.send(dbRes)
+  res.send(await remove(COLLECTIONS.classes, req.params.cid, updateData))
 }))
+
+app.post('/api/training', checkSecretKey(async (req, res) => {
+  let errors = validateTraining(req.body)
+  if (errors.length === 0)
+    res.send(await upsert(COLLECTIONS.trainings, req.body, undefined, updateData))
+  else
+    res.status(400).send(errors)
+}))
+app.put('/api/training/:tid', checkSecretKey(async (req, res) => {
+  let errors = validateTraining(req.body)
+  if (errors.length === 0)
+    res.send(await upsert(COLLECTIONS.trainings, req.body, req.params.tid, updateData))
+  else
+    res.status(400).send(errors)
+}))
+app.delete('/api/training/:tid', checkSecretKey(async (req, res) => {
+  res.send(await remove(COLLECTIONS.trainings, req.params.tid, updateData))
+}))
+
+// telegram bot -------------------------
 
 app.post('/api/bot/', checkSecretKey((req, res) => {
   send2Group(req.body.msg)
   res.send(req.body)
 }))
 
-
-app.listen(3000, async () => {
-  console.log('running ...')
-  await updateData()
-  runScheduler()
-})
-
-// telegram bot -------------------------
 function send2Group(msg) {
   bot.sendMessage(GROUP_CHATID, msg)
 }
@@ -170,7 +173,7 @@ bot.on("message", (msg) => {
       "ساکت لطفا",
     ])[0])
 
-  else if (msg.text.startsWith('/classes') ){
+  else if (msg.text.startsWith('/classes')) {
     let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
     send([
       "هم اکنون",
@@ -179,13 +182,12 @@ bot.on("message", (msg) => {
       "\n\n-----------------------\n",
       "کلاس ها:",
       "\n",
-      currentClasses.map((cls, i) => `\n${i+1} -> ${getClassShortInfo(cls)}`).join("\n")
+      currentClasses.map((cls, i) => `\n${i + 1} -> ${getClassShortInfo(cls)}`).join("\n")
     ].join(' '))
   }
 })
 
 // --------------------------------
-
 
 let lastClassIds = []
 
@@ -229,3 +231,11 @@ function runScheduler() {
   task()
   return setInterval(task, 60 * 1000)
 }
+
+// ----------------------------
+
+app.listen(3000, async () => {
+  console.log('running ...')
+  await updateData()
+  runScheduler()
+})
