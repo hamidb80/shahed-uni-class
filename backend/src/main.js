@@ -43,7 +43,6 @@ function resetProgram() {
 
 function processData(classesArray, trainingsArray) {
   resetProgram()
-
   for (let di = 0; di < 7; di++) { // day index
     for (let ti = 0; ti < 7; ti++) { // time index
       program[di][ti] =
@@ -54,6 +53,7 @@ function processData(classesArray, trainingsArray) {
   }
 
   classes = classesArray.reduce((o, cls) => updateObject(o, cls["_id"], cls), {})
+
   trainings = trainingsArray
 }
 

@@ -1,4 +1,5 @@
 import { validateStructure, buildError } from 'validate-structure'
+import moment from 'moment'
 
 export const types = {
   Day: "number[]",
@@ -19,8 +20,9 @@ export const types = {
 }
 
 function DateTimeValiator(val) {
-  return []
-  return buildError(`'${val}' does not start with a '$'`)
+  return typeof val === 'string' && moment(val).isValid() ?
+    [] :
+    buildError("is not a valid datetime format")
 }
 
 export function validateClass(object) {
