@@ -62,9 +62,9 @@
       </div>
     </div>
 
-    <div class="btn" v-if="isAdmin" @click="handleSubmit">ثبت کلاس</div>
+    <div class="btn" v-if="isAdmin" @click="handleSubmit">ثبت</div>
     <div class="btn" v-if="isAdmin && fromExisting" @click="handleDelete">
-      حذف کلاس
+      حذف
     </div>
   </div>
 </template>

@@ -11,7 +11,7 @@ export function getClassShortInfo(cls) {
 
 export function getTraningInfo(tr, classesObject) {
   return [
-    ["تمرین", tr["name"]],
+    ["عنوان", tr["name"]],
     ["تاریخ تحویل", tr["datetime"]],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
@@ -20,7 +20,7 @@ export function getTraningInfo(tr, classesObject) {
 
 export function getEventInfo(tr, classesObject) {
   return [
-    ["رویداد", tr["name"]],
+    ["عنوان", tr["name"]],
     ["تاریخ", tr["datetime"]],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],

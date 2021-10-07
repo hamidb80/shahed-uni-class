@@ -29,7 +29,7 @@ export async function upsert(collectionName, object, id, hookfn) {
       { upsert: true }
     ))
 
-  if (hookfn) await fn()
+  if (hookfn) await hookfn()
   return result
 }
 
@@ -39,6 +39,6 @@ export async function remove(collectionName, id, hookfn) {
       _id: ObjectId(id)
     }))
 
-  if (hookfn) await fn()
+  if (hookfn) await hookfn()
   return result
 }

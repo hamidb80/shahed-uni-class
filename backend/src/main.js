@@ -10,8 +10,8 @@ import moment from 'moment'
 import { validateClass, validateEvent } from './types.js'
 import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder } from './serialize.js'
 import { db, COLLECTIONS, runQuery, upsert, remove } from './db.js'
-import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
-import { spliceArray } from '../utils/array.js'
+import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
+import { spliceArray, object2array } from '../utils/array.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
@@ -55,10 +55,10 @@ function processData(classesArray, eventArray) {
     }
   }
 
-  classes = classesArray.reduce((o, cls) => updateObject(o, cls["_id"], cls), {})
+  classes = arr2object(classesArray, cls => cls["_id"])
 
-  trainings = spliceArray(eventArray, ev => ev.type === "training")
-  events = eventArray
+  trainings = arr2object(spliceArray(eventArray, ev => ev.type === "training"), tr => tr["_id"])
+  events = arr2object(eventArray, ev => ev["_id"])
 }
 
 // ------------------- database 
@@ -106,14 +106,14 @@ app.post('/api/update', checkSecretKey(async (req, res) => {
 app.post('/api/class', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsertClass(COLLECTIONS.classes, req.body, undefined, updateData))
+    res.send(await upsert(COLLECTIONS.classes, req.body, undefined, updateData))
   else
     res.status(400).send(errors)
 }))
 app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsertClass(COLLECTIONS.classes, req.body, req.params.cid, updateData))
+    res.send(await upsert(COLLECTIONS.classes, req.body, req.params.cid, updateData))
   else
     res.status(400).send(errors)
 }))
@@ -194,22 +194,26 @@ bot.on("message", (msg) => {
   }
 
   else if (msg.text.startsWith('/trainings')) {
+    let trArray = object2array(trainings)
+
     send([
       "تعداد",
-      trainings.length,
+      trArray.length,
       "تمرین موجود میباشد",
       "\n",
-      trainings.map(tr => applyBorder(getTraningInfo(tr, classes))).join("\n\n")
+      trArray.map(tr => applyBorder(getTraningInfo(tr, classes))).join("\n\n")
     ].join(" "))
   }
 
   else if (msg.text.startsWith('/events')) {
+    let evArray = object2array(events)
+
     send([
       "تعداد",
-      events.length,
+      evArray.length,
       "رویداد وجود دارد",
       "\n",
-      events.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
+      evArray.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
     ].join(" "))
   }
 })

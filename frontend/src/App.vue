@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
-    <div :class="['overly', { active: showMenu }]">
-      <div class="forms" v-if="form && showMenu">
+    <div :class="['overly', { active: form || showMenu }]">
+      <div class="forms" v-if="form">
         <div v-if="loading" class="loading">صبر کنید ...</div>
         <login-form v-else-if="form === 'login'" @submit="login" />
         <class-form
@@ -10,6 +10,14 @@
           :isAdmin="isVerifed"
           @delete="deleteClass"
           @createOrUpadte="createOrUpadteClass"
+        />
+        <training-form
+          v-else-if="form === 'training'"
+          :data="selectedTrainingId ? trainings[selectedTrainingId] : {}"
+          :isAdmin="isVerifed"
+          :classes="classes"
+          @delete="deleteEvent"
+          @createOrUpadte="createOrUpadteEvent"
         />
       </div>
     </div>
@@ -44,7 +52,7 @@
               class="class"
               v-for="clsId in time"
               :key="clsId"
-              @click="clickOnClass(clsId)"
+              @click="clickOnItem('class', clsId)"
             >
               {{ classes[clsId].lesson }}
             </div>
@@ -65,7 +73,11 @@
           <th>استاد</th>
           <th>تاریخ تحویل</th>
         </tr>
-        <tr v-for="tr in trainings" :key="tr['_id']">
+        <tr
+          v-for="(tr, id) in trainings"
+          :key="id"
+          @click="clickOnItem('training', id)"
+        >
           <td>{{ tr["name"] }}</td>
           <td>{{ classes[tr["classId"]]["lesson"] }}</td>
           <td>{{ classes[tr["classId"]]["teacher"] }}</td>
@@ -95,33 +107,31 @@
 
     <footer class="app-footer">
       <div class="tool-bar">
-        <div
-          class="btn"
-          @click="
-            showMenu = !showMenu;
-            form = '';
-          "
-        >
-          <closeI v-if="showMenu" class="icon" />
-          <moreI v-else class="icon" />
+        <div>
+          <div v-if="!(form || showMenu)" class="btn" @click="showMenu = true">
+            <moreI class="icon" />
+          </div>
+          <div v-else class="btn" @click="closeMenu">
+            <closeI class="icon" />
+          </div>
         </div>
 
-        <template v-if="showMenu">
-          <template v-if="isVerifed">
+        <div v-if="showMenu && !form">
+          <div v-if="isVerifed">
             <div class="btn" @click="changeForm('class')">
               <schoolI class="icon" />
             </div>
-            <div class="btn" @click="changeForm('class')">
+            <div class="btn" @click="changeForm('training')">
               <bookI class="icon" />
             </div>
-            <div class="btn" @click="changeForm('class')">
+            <div class="btn" @click="changeForm('event')">
               <calendarI class="icon" />
             </div>
-          </template>
+          </div>
           <div v-else class="btn" @click="changeForm('login')">
             <loginI class="icon" />
           </div>
-        </template>
+        </div>
       </div>
     </footer>
 
@@ -142,6 +152,7 @@ import calendarI from "./icons/vue/calendar.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
+import trainingF from "./forms/training.vue";
 
 const httpClient = axios.create({
   baseURL:
@@ -149,7 +160,7 @@ const httpClient = axios.create({
       ? // ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
         "http://localhost:3000/api/"
       : "/api/",
-  timeout: 10 * 1000,
+  timeout: 60 * 1000,
 });
 
 export default {
@@ -165,6 +176,7 @@ export default {
 
     "class-form": classF,
     "login-form": loginF,
+    "training-form": trainingF,
   },
 
   data: () => ({
@@ -177,11 +189,13 @@ export default {
     secretKey: "",
 
     selectedClassId: "",
+    selectedTrainingId: "",
+    selectedEventId: "",
 
     classes: {}, // classId => class{teacher, lesson, program}
     program: [],
-    trainings: [],
-    events: [],
+    trainings: {},
+    events: {},
 
     maxDaysClasses: [], // array of int
 
@@ -199,10 +213,12 @@ export default {
   },
 
   methods: {
-    clickOnClass(classId) {
+    clickOnItem(formName, itemId) {
       this.showMenu = true;
-      this.form = "class";
-      this.selectedClassId = classId;
+      this.form = formName;
+
+      if (formName === "class") this.selectedClassId = itemId;
+      else if (formName === "training") this.selectedTrainingId = itemId;
     },
 
     changeForm(formName) {
@@ -217,6 +233,8 @@ export default {
       let res = await httpClient.post("/verify", { secretKey }, this.reqCfg);
       this.isVerifed = res.data["result"];
 
+      this.form = "";
+      this.showMenu = false;
       this.loading = false;
     },
 
@@ -229,12 +247,28 @@ export default {
 
       await this.update();
     },
-
     async deleteClass(classId) {
       this.loading = true;
       this.selectedClassId = "";
 
       await httpClient.delete(`/class/${classId}`, this.reqCfg);
+      await this.update();
+    },
+
+    async createOrUpadteEvent(trId, trainingObject) {
+      this.loading = true;
+
+      if (trId)
+        await httpClient.put(`/event/${trId}`, trainingObject, this.reqCfg);
+      else await httpClient.post("/event", trainingObject, this.reqCfg);
+
+      await this.update();
+    },
+    async deleteEvent(trId) {
+      this.loading = true;
+      this.selectedTrainingId = "";
+
+      await httpClient.delete(`/event/${trId}`, this.reqCfg);
       await this.update();
     },
 
@@ -253,6 +287,11 @@ export default {
       );
 
       this.loading = false;
+    },
+
+    closeMenu() {
+      this.showMenu = false;
+      this.form = "";
     },
   },
 
@@ -456,6 +495,12 @@ section {
       &:first-child {
         background-color: #212121;
         color: white;
+      }
+      &:hover {
+        cursor: pointer;
+        td {
+          background-color: #ffecc8;
+        }
       }
     }
   }

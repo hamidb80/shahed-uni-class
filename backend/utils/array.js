@@ -17,3 +17,13 @@ export function spliceArray(arr, fn) {
 
   return matched
 }
+
+
+export function object2array(object) {
+  let res = []
+
+  for (const key in object)
+    res.push(object[key])
+
+  return res
+}
