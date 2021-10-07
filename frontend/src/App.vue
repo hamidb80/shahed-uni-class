@@ -107,14 +107,20 @@
         </div>
 
         <template v-if="showMenu">
-          <div class="btn" v-if="isVerifed" @click="changeForm('class')">
-            <schoolI class="icon" />
-          </div>
-          <template v-else>
-            <div class="btn" @click="changeForm('login')">
-              <loginI class="icon" />
+          <template v-if="isVerifed">
+            <div class="btn" @click="changeForm('class')">
+              <schoolI class="icon" />
+            </div>
+            <div class="btn" @click="changeForm('class')">
+              <bookI class="icon" />
+            </div>
+            <div class="btn" @click="changeForm('class')">
+              <calendarI class="icon" />
             </div>
           </template>
+          <div v-else class="btn" @click="changeForm('login')">
+            <loginI class="icon" />
+          </div>
         </template>
       </div>
     </footer>
@@ -131,6 +137,8 @@ import loginI from "./icons/vue/login.vue";
 import moreI from "./icons/vue/more.vue";
 import schoolI from "./icons/vue/school.vue";
 import closeI from "./icons/vue/close.vue";
+import bookI from "./icons/vue/book.vue";
+import calendarI from "./icons/vue/calendar.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
@@ -151,6 +159,9 @@ export default {
     moreI,
     schoolI,
     closeI,
+    bookI,
+
+    calendarI,
 
     "class-form": classF,
     "login-form": loginF,
@@ -438,7 +449,7 @@ section {
         .fa();
       }
 
-      &:nth-child(even){
+      &:nth-child(even) {
         background-color: #f3f3f3;
       }
 
@@ -447,6 +458,10 @@ section {
         color: white;
       }
     }
+  }
+
+  @media screen and (max-width: @mobile-width) {
+    .px(0);
   }
 }
 
