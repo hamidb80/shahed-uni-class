@@ -92,7 +92,7 @@ app.get('/api/now', (req, res) => {
   res.send(moment().format())
 })
 app.get('/api/getAll', async (req, res) => {
-  res.send({ classes, program, trainings })
+  res.send({ classes, program, trainings, events })
 })
 
 app.post('/api/verify', (req, res) => {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="wrapper">
     <div :class="['overly', { active: showMenu }]">
       <div class="forms" v-if="form && showMenu">
         <div v-if="loading" class="loading">صبر کنید ...</div>
@@ -54,6 +54,45 @@
       </div>
     </div>
 
+    <section>
+      <header>
+        <h2>تمرین ها</h2>
+      </header>
+      <table class="tranings">
+        <tr>
+          <th>نام</th>
+          <th>کلاس</th>
+          <th>استاد</th>
+          <th>تاریخ تحویل</th>
+        </tr>
+        <tr v-for="tr in trainings" :key="tr['_id']">
+          <td>{{ tr["name"] }}</td>
+          <td>{{ classes[tr["classId"]]["lesson"] }}</td>
+          <td>{{ classes[tr["classId"]]["teacher"] }}</td>
+          <td>{{ new Date(tr["datetime"]).toLocaleDateString("fa-IR") }}</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <header>
+        <h2>رویداد ها</h2>
+      </header>
+
+      <table class="events">
+        <tr>
+          <th>نام</th>
+          <th>کلاس</th>
+          <th>تاریخ</th>
+        </tr>
+        <tr v-for="ev in events" :key="ev['_id']">
+          <td>{{ ev["name"] }}</td>
+          <td>{{ ev["classId"] }}</td>
+          <td>{{ ev["datetime"] }}</td>
+        </tr>
+      </table>
+    </section>
+
     <footer class="app-footer">
       <div class="tool-bar">
         <div
@@ -79,6 +118,8 @@
         </template>
       </div>
     </footer>
+
+    <div class="bottom-space"></div>
   </div>
 </template>
 
@@ -97,9 +138,9 @@ import classF from "./forms/class.vue";
 const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
-      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
-      : // ? "http://localhost:3000/api/" :
-        "/api/",
+      ? // ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
+        "http://localhost:3000/api/"
+      : "/api/",
   timeout: 10 * 1000,
 });
 
@@ -128,6 +169,8 @@ export default {
 
     classes: {}, // classId => class{teacher, lesson, program}
     program: [],
+    trainings: [],
+    events: [],
 
     maxDaysClasses: [], // array of int
 
@@ -188,8 +231,11 @@ export default {
       this.loading = true;
 
       let res = await httpClient.get("/getAll");
+
       this.classes = res.data.classes;
       this.program = res.data.program;
+      this.trainings = res.data.trainings;
+      this.events = res.data.events;
 
       this.maxDaysClasses = this.program.map((dayProgram) =>
         Math.max(...dayProgram.map((time) => time.length))
@@ -369,6 +415,41 @@ export default {
   }
 }
 
+section {
+  margin-top: 40px;
+  .px(16px);
+
+  header {
+    h2 {
+      .fa();
+    }
+  }
+
+  table {
+    direction: rtl;
+    width: 100%;
+    border-collapse: collapse;
+
+    tr {
+      td,
+      th {
+        border: 1px solid #565656;
+        text-align: center;
+        .fa();
+      }
+
+      &:nth-child(even){
+        background-color: #f3f3f3;
+      }
+
+      &:first-child {
+        background-color: #212121;
+        color: white;
+      }
+    }
+  }
+}
+
 .app-footer {
   position: fixed;
   bottom: 0;
@@ -399,6 +480,10 @@ export default {
       }
     }
   }
+}
+
+.bottom-space {
+  margin-top: 100px;
 }
 
 .overly {
