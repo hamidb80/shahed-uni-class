@@ -11,9 +11,19 @@
           @delete="deleteClass"
           @createOrUpadte="createOrUpadteClass"
         />
-        <training-form
+        <event-form
           v-else-if="form === 'training'"
+          type="training"
           :data="selectedTrainingId ? trainings[selectedTrainingId] : {}"
+          :isAdmin="isVerifed"
+          :classes="classes"
+          @delete="deleteEvent"
+          @createOrUpadte="createOrUpadteEvent"
+        />
+        <event-form
+          v-else-if="form === 'event'"
+          type="event"
+          :data="selectedEventId ? events[selectedEventId] : {}"
           :isAdmin="isVerifed"
           :classes="classes"
           @delete="deleteEvent"
@@ -81,7 +91,7 @@
           <td>{{ tr["name"] }}</td>
           <td>{{ classes[tr["classId"]]["lesson"] }}</td>
           <td>{{ classes[tr["classId"]]["teacher"] }}</td>
-          <td>{{ new Date(tr["datetime"]).toLocaleDateString("fa-IR") }}</td>
+          <td>{{ toPersianDate(tr["datetime"]) }}</td>
         </tr>
       </table>
     </section>
@@ -95,12 +105,18 @@
         <tr>
           <th>نام</th>
           <th>کلاس</th>
+          <th>استاد</th>
           <th>تاریخ</th>
         </tr>
-        <tr v-for="ev in events" :key="ev['_id']">
+        <tr
+          v-for="(ev, id) in events"
+          :key="id"
+          @click="clickOnItem('event', id)"
+        >
           <td>{{ ev["name"] }}</td>
-          <td>{{ ev["classId"] }}</td>
-          <td>{{ ev["datetime"] }}</td>
+          <td>{{ classes[ev["classId"]]["lesson"] }}</td>
+          <td>{{ classes[ev["classId"]]["teacher"] }}</td>
+          <td>{{ toPersianDate(ev["datetime"]) }}</td>
         </tr>
       </table>
     </section>
@@ -152,14 +168,14 @@ import calendarI from "./icons/vue/calendar.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
-import trainingF from "./forms/training.vue";
+import eventF from "./forms/event.vue";
 
 const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
-      ? // ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
-        "http://localhost:3000/api/"
-      : "/api/",
+      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
+      : // ? "http://localhost:3000/api/"
+        "/api/",
   timeout: 60 * 1000,
 });
 
@@ -176,7 +192,7 @@ export default {
 
     "class-form": classF,
     "login-form": loginF,
-    "training-form": trainingF,
+    "event-form": eventF,
   },
 
   data: () => ({
@@ -213,17 +229,21 @@ export default {
   },
 
   methods: {
+    toPersianDate(dt) {
+      return new Date(dt).toLocaleDateString("fa-IR");
+    },
+
     clickOnItem(formName, itemId) {
       this.showMenu = true;
       this.form = formName;
 
       if (formName === "class") this.selectedClassId = itemId;
       else if (formName === "training") this.selectedTrainingId = itemId;
+      else if (formName === "event") this.selectedEventId = itemId;
     },
 
     changeForm(formName) {
       this.form = formName;
-      this.selectedClassId = "";
     },
 
     async login(secretKey) {
@@ -267,6 +287,7 @@ export default {
     async deleteEvent(trId) {
       this.loading = true;
       this.selectedTrainingId = "";
+      this.selectedEventId = ""
 
       await httpClient.delete(`/event/${trId}`, this.reqCfg);
       await this.update();

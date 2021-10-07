@@ -4,11 +4,12 @@
   box-sizing: border-box;
 }
 
-body{
+body {
   min-height: 100vh;
+  --webkit-tap-highlight-color: transparent;
 }
 
-.app{
+.app {
   height: 100%;
 }
 
@@ -24,6 +25,7 @@ body{
   direction: rtl;
 }
 
+
 ::-webkit-scrollbar-track {
   background-color: #F5F5F5;
 }
@@ -38,7 +40,8 @@ body{
   background-color: #212121;
 }
 
-::-moz-selection { /* Code for Firefox */
+::-moz-selection {
+  /* Code for Firefox */
   color: #424242;
   background: #ffc8c8;
 }
@@ -50,11 +53,12 @@ body{
 
 
 // -------------------------
-.square(@s){
+.square(@s) {
   width: @s;
   height: @s;
 }
-.circle(@s){
+
+.circle(@s) {
   .square(@s);
   border-radius: 50%;
 }
@@ -63,33 +67,33 @@ body{
 // ---------------
 
 
-.px(@s){
+.px(@s) {
   padding-left: @s;
   padding-right: @s;
 }
 
-.py(@s){
+.py(@s) {
   padding-top: @s;
   padding-bottom: @s;
 }
 
 
-.mx(@s){
+.mx(@s) {
   margin-left: @s;
   margin-right: @s;
 }
 
-.my(@s){
+.my(@s) {
   margin-top: @s;
   margin-bottom: @s;
 }
 
-.x-center{
+.x-center {
   display: flex;
   justify-content: center;
 }
 
-.y-center{
+.y-center {
   display: flex;
   align-items: center;
 }
