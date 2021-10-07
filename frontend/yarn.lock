@@ -5206,6 +5206,11 @@ persian-date@^1.1.0:
   resolved "https://registry.yarnpkg.com/persian-date/-/persian-date-1.1.0.tgz#a06155797bca20217fa8302101ea5efd041a3221"
   integrity sha512-YwV3703jLTTJFFQfP3RvMfvKZc5Z1yE++Deywox+hkVLuVN81VsTaZFma9k5P9SgfSUvXjiylbQVuf4YYLGOow==
 
+persian-number@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/persian-number/-/persian-number-1.5.1.tgz#7c897e8ab8f72ba2eba4daf8d8be19b8aec5fab6"
+  integrity sha512-BbJ0vUV23RtFCYiEn6jTx3hzDHRD8pAWl7xrisff2Pihqopu2G2zIySscchJ6lWp8QnwJBXf2FXHIW5V2QemRQ==
+
 picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.2.3:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.0.tgz#f1f061de8f6a4bf022892e2d128234fb98302972"

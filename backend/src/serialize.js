@@ -1,4 +1,4 @@
-import moment from "moment"
+import { toPersianDate } from '../utils/time.js'
 
 export function getClassShortInfo(cls) {
   return [
@@ -12,7 +12,7 @@ export function getClassShortInfo(cls) {
 export function getTraningInfo(tr, classesObject) {
   return [
     ["عنوان", tr["name"]],
-    ["تاریخ تحویل", tr["datetime"]],
+    ["تاریخ تحویل", toPersianDate(tr["datetime"])],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
   ].map(arr => arr.join(': ')).join('\n')
@@ -21,7 +21,7 @@ export function getTraningInfo(tr, classesObject) {
 export function getEventInfo(tr, classesObject) {
   return [
     ["عنوان", tr["name"]],
-    ["تاریخ", tr["datetime"]],
+    ["تاریخ", toPersianDate(tr["datetime"])],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
   ].map(arr => arr.join(': ')).join('\n')

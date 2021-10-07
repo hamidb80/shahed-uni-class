@@ -913,6 +913,11 @@ performance-now@^2.1.0:
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
 
+persian-number@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/persian-number/-/persian-number-1.5.1.tgz#7c897e8ab8f72ba2eba4daf8d8be19b8aec5fab6"
+  integrity sha512-BbJ0vUV23RtFCYiEn6jTx3hzDHRD8pAWl7xrisff2Pihqopu2G2zIySscchJ6lWp8QnwJBXf2FXHIW5V2QemRQ==
+
 pick-random@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/pick-random/-/pick-random-4.0.0.tgz#fe10ba003178e234759fdb406d2fab3a0aa7ad45"
