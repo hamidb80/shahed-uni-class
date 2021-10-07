@@ -292,6 +292,9 @@ export default {
     closeMenu() {
       this.showMenu = false;
       this.form = "";
+      this.selectedTrainingId = "";
+      this.selectedClassId = "";
+      this.selectedEventId = "";
     },
   },
 
