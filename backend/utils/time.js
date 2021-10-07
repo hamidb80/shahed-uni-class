@@ -2,7 +2,7 @@ import moment from 'moment'
 import jalaali from 'jalaali-js'
 
 import { isBetween, modulo } from "./math.js"
-import { convertEnToPe } from "persian-number"
+import PN from "persian-number"
 const { duration } = moment
 
 // ----------------------------
@@ -53,6 +53,6 @@ export function getClassTimeIndex(mCurentTime, timeRanges) {
 
 export function toPersianDate(datetime) {
   let jdate = jalaali.toJalaali(datetime)
-  return convertEnToPe(
+  return PN.convertEnToPe(
     `${jdate.jy}/${jdate.jm}/${jdate.jd} | ${datetime.getHours()}:${datetime.getMinutes()}`)
 }
