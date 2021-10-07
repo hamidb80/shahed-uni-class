@@ -10,6 +10,7 @@ import moment from 'moment'
 import { validateClass, validateEvent } from './types.js'
 import { db, COLLECTIONS, runQuery, upsert, remove } from './db.js'
 import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
+import { spliceArray } from '../utils/array.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
@@ -41,7 +42,7 @@ function resetProgram() {
   }
 }
 
-function processData(classesArray, trainingsArray) {
+function processData(classesArray, eventArray) {
   resetProgram()
   for (let di = 0; di < 7; di++) { // day index
     for (let ti = 0; ti < 7; ti++) { // time index
@@ -54,7 +55,7 @@ function processData(classesArray, trainingsArray) {
 
   classes = classesArray.reduce((o, cls) => updateObject(o, cls["_id"], cls), {})
 
-  trainings = trainingsArray
+  trainings = spliceArray(eventArray, ev => ev.type === "training")
 }
 
 // ------------------- database 
@@ -158,7 +159,9 @@ bot.on("message", (msg) => {
       [
         ["/check", "بررسی وضعیت"],
         ["/classes", "کلاس های در حال برگزاری"],
-        ["/trainings", "تمرین ها"]
+        ["/trainings", "تمرین ها"],
+        ["/events", "رویداد ها"],
+        ["/fal", "فال"],
       ].map(arr => arr.join('  ')).join("\n"),
     ].join(' '))
 
@@ -170,6 +173,8 @@ bot.on("message", (msg) => {
       "عهههههه دارم کار میکنم",
       "چییییههه؟",
       "ساکت لطفا",
+      "...",
+      "هعی",
     ])[0])
 
   else if (msg.text.startsWith('/classes')) {
@@ -182,7 +187,7 @@ bot.on("message", (msg) => {
       ].join(' '),
       "-----------------------",
       "کلاس ها",
-      currentClasses.map((cls, i) => `\n${i + 1} -> ${getClassShortInfo(cls)}`).join("\n")
+      currentClasses.map(cls => `\n- ${getClassShortInfo(cls)}`).join("\n")
     ].join('\n'))
   }
 
@@ -191,14 +196,16 @@ bot.on("message", (msg) => {
       "تمرینات",
       "----------------------------",
       "\n",
-      trainings.map(JSON.stringify).join("\n")
+      trainings.map(tr => JSON.stringify(tr, null, 2)).join("\n")
     ].join("\n"))
   }
 })
 
 // --------------------------------
 
-let lastClassIds = []
+let
+  lastClassIds = [],
+  lastBeforeClassIds = []
 
 function getClassShortInfo(cls) {
   return [
@@ -223,17 +230,24 @@ function currentClassIds(now) {
 function task() {
   console.log('task')
 
-  let newClassIds = currentClassIds(getCurrentWeekTimeInfo())
+  let
+    newClassIds = currentClassIds(getCurrentWeekTimeInfo()),
+    newBeforeClassIds = currentClassIds(getCurrentWeekTimeInfo(moment.duration(15, "minutes")))
 
-  for (const clsId of difference(newClassIds, lastClassIds)) {
-    const cls = classes[clsId]
+  for (const clsId of difference(newClassIds, lastClassIds))
     send2Group([
-      getClassShortInfo(cls),
+      getClassShortInfo(classes[clsId]),
       "در حال برگزاری است",
     ].join(' '))
-  }
+
+  for (const clsId of difference(newBeforeClassIds, lastBeforeClassIds))
+    send2Group([
+      getClassShortInfo(classes[clsId]),
+      "دقایقی دیگر برگزار میشود",
+    ].join(' '))
 
   lastClassIds = newClassIds
+  lastBeforeClassIds = newBeforeClassIds
 }
 
 function runScheduler() {

@@ -32,8 +32,12 @@ export function moment2Minutes(du) {
   return du.hours() * 60 + du.minutes()
 }
 
-export function getCurrentWeekTimeInfo() {
+export function getCurrentWeekTimeInfo(deltaTime) {
   const now = moment()
+
+  if (deltaTime)
+    now.add(deltaTime)
+
   return {
     dayIndex: modulo(now.weekday() + 1, 7),
     mtime: moment2Minutes(now)
