@@ -8,6 +8,7 @@ import { difference } from "set-operations"
 import moment from 'moment'
 
 import { validateClass, validateEvent } from './types.js'
+import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder } from './serialize.js'
 import { db, COLLECTIONS, runQuery, upsert, remove } from './db.js'
 import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
 import { spliceArray } from '../utils/array.js'
@@ -30,6 +31,7 @@ const bot = new TelegramBot(TG_TOKEN, { polling: true })
 let
   classes = {}, // class_id => class
   trainings = [], // 
+  events = [],
   program = [] // array of day | day is array of time | time is array of class_ids
 
 function resetProgram() {
@@ -56,6 +58,7 @@ function processData(classesArray, eventArray) {
   classes = classesArray.reduce((o, cls) => updateObject(o, cls["_id"], cls), {})
 
   trainings = spliceArray(eventArray, ev => ev.type === "training")
+  events = eventArray
 }
 
 // ------------------- database 
@@ -185,19 +188,29 @@ bot.on("message", (msg) => {
         currentClasses.length,
         "کلاس در حال برگزاری است",
       ].join(' '),
-      "-----------------------",
-      "کلاس ها",
+      border,
       currentClasses.map(cls => `\n- ${getClassShortInfo(cls)}`).join("\n")
     ].join('\n'))
   }
 
   else if (msg.text.startsWith('/trainings')) {
     send([
-      "تمرینات",
-      "----------------------------",
+      "تعداد",
+      trainings.length,
+      "تمرین موجود میباشد",
       "\n",
-      trainings.map(tr => JSON.stringify(tr, null, 2)).join("\n")
-    ].join("\n"))
+      trainings.map(tr => applyBorder(getTraningInfo(tr, classes))).join("\n\n")
+    ].join(" "))
+  }
+
+  else if (msg.text.startsWith('/events')) {
+    send([
+      "تعداد",
+      events.length,
+      "رویداد وجود دارد",
+      "\n",
+      events.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
+    ].join(" "))
   }
 })
 
@@ -206,15 +219,6 @@ bot.on("message", (msg) => {
 let
   lastClassIds = [],
   lastBeforeClassIds = []
-
-function getClassShortInfo(cls) {
-  return [
-    "کلاس",
-    cls["lesson"],
-    "با",
-    cls["teacher"]
-  ].join(' ')
-}
 
 function currentClassIds(now) {
   let classTimeIndex = getClassTimeIndex(now.mtime, classTimes)
