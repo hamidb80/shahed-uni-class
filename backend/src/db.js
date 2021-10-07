@@ -1,14 +1,44 @@
-import { MongoClient } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb'
 import { MONGODB_CONNECTION_URI } from './config.js'
 
 
 export const
-  mdb = new MongoClient(MONGODB_CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true }),
-  scc = mdb.db("shahed").collection("classes") // shahed class collection
+  mongo = new MongoClient(MONGODB_CONNECTION_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }),
+  db = mongo.db("shahed"),
+
+  COLLECTIONS = {
+    classes: "classes",
+    events: "events"
+  }
 
 export async function runQuery(fn) {
-  await mdb.connect().catch(console.log)
+  await mongo.connect().catch(console.log)
   let res = await fn()
-  mdb.close()
+  mongo.close()
   return res
+}
+
+export async function upsert(collectionName, object, id, hookfn) {
+  let result = await runQuery(
+    async () => await db.collection(collectionName).updateOne(
+      { _id: ObjectId(id) },
+      { $set: object },
+      { upsert: true }
+    ))
+
+  if (hookfn) await hookfn()
+  return result
+}
+
+export async function remove(collectionName, id, hookfn) {
+  let result = await runQuery(
+    async () => await db.collection(collectionName).deleteOne({
+      _id: ObjectId(id)
+    }))
+
+  if (hookfn) await hookfn()
+  return result
 }

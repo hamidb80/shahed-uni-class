@@ -3,14 +3,15 @@ import cors from 'cors'
 import TelegramBot from 'node-telegram-bot-api'
 import path from 'path'
 
-import { ObjectId } from 'mongodb'
 import pickRandom from 'pick-random'
 import { difference } from "set-operations"
 import moment from 'moment'
 
-import { validateClass } from './types.js'
-import { scc, runQuery } from './db.js'
-import { updateObject, objectMap2Array, objecFilter } from '../utils/object.js'
+import { validateClass, validateEvent } from './types.js'
+import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder } from './serialize.js'
+import { db, COLLECTIONS, runQuery, upsert, remove } from './db.js'
+import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
+import { spliceArray, object2array } from '../utils/array.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
@@ -29,6 +30,8 @@ const bot = new TelegramBot(TG_TOKEN, { polling: true })
 
 let
   classes = {}, // class_id => class
+  trainings = [], // 
+  events = [],
   program = [] // array of day | day is array of time | time is array of class_ids
 
 function resetProgram() {
@@ -41,9 +44,8 @@ function resetProgram() {
   }
 }
 
-function processData(classesArray) {
+function processData(classesArray, eventArray) {
   resetProgram()
-
   for (let di = 0; di < 7; di++) { // day index
     for (let ti = 0; ti < 7; ti++) { // time index
       program[di][ti] =
@@ -53,27 +55,22 @@ function processData(classesArray) {
     }
   }
 
-  classes = classesArray.reduce((o, cls) => updateObject(o, cls["_id"], cls), {})
+  classes = arr2object(classesArray, cls => cls["_id"])
+
+  trainings = arr2object(spliceArray(eventArray, ev => ev.type === "training"), tr => tr["_id"])
+  events = arr2object(eventArray, ev => ev["_id"])
 }
 
-// database connection
+// ------------------- database 
 
 async function updateData() {
   processData(
     await runQuery(
-      async () => await scc.find().toArray()))
-}
+      async () => await db.collection(COLLECTIONS.classes).find().toArray()),
 
-async function upsertClass(clsObject, clsId) {
-  let result = await runQuery(
-    async () => await scc.updateOne(
-      { _id: ObjectId(clsId) },
-      { $set: clsObject },
-      { upsert: true }
-    ))
-
-  await updateData()
-  return result
+    await runQuery(
+      async () => await db.collection(COLLECTIONS.events).find().toArray())
+  )
 }
 
 // web service --------------------------------------
@@ -91,55 +88,64 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', '/page.html'))
 })
 
-
 app.get('/api/now', (req, res) => {
   res.send(moment().format())
 })
 app.get('/api/getAll', async (req, res) => {
-  res.send({ classes, program })
-})
-app.post('/api/update', async (req, res) => {
-  await updateData()
-  res.send({ result: "ok" })
+  res.send({ classes, program, trainings, events })
 })
 
 app.post('/api/verify', (req, res) => {
   res.send({ result: req.body.secretKey === SECRET_KEY })
 })
+app.post('/api/update', checkSecretKey(async (req, res) => {
+  await updateData()
+  res.send({ result: "ok" })
+}))
 
 app.post('/api/class', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsertClass(req.body, ObjectId()))
-
-  else res.status(400).send(errors)
+    res.send(await upsert(COLLECTIONS.classes, req.body, undefined, updateData))
+  else
+    res.status(400).send(errors)
 }))
 app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsertClass(req.body, req.params.cid))
-
-  else res.status(400).send(errors)
+    res.send(await upsert(COLLECTIONS.classes, req.body, req.params.cid, updateData))
+  else
+    res.status(400).send(errors)
 }))
 app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
-  let dbRes = await runQuery(async () => await scc.deleteOne({ _id: ObjectId(req.params.cid) }))
-  await updateData()
-  res.send(dbRes)
+  res.send(await remove(COLLECTIONS.classes, req.params.cid, updateData))
 }))
+
+app.post('/api/event', checkSecretKey(async (req, res) => {
+  let errors = validateEvent(req.body)
+  if (errors.length === 0)
+    res.send(await upsert(COLLECTIONS.events, req.body, undefined, updateData))
+  else
+    res.status(400).send(errors)
+}))
+app.put('/api/event/:evid', checkSecretKey(async (req, res) => {
+  let errors = validateEvent(req.body)
+  if (errors.length === 0)
+    res.send(await upsert(COLLECTIONS.events, req.body, req.params.evid, updateData))
+  else
+    res.status(400).send(errors)
+}))
+app.delete('/api/event/:evid', checkSecretKey(async (req, res) => {
+  res.send(await remove(COLLECTIONS.events, req.params.evid, updateData))
+}))
+
+// telegram bot -------------------------
 
 app.post('/api/bot/', checkSecretKey((req, res) => {
   send2Group(req.body.msg)
   res.send(req.body)
 }))
 
-
-app.listen(3000, async () => {
-  console.log('running ...')
-  await updateData()
-  runScheduler()
-})
-
-// telegram bot -------------------------
 function send2Group(msg) {
   bot.sendMessage(GROUP_CHATID, msg)
 }
@@ -153,11 +159,13 @@ bot.on("message", (msg) => {
     send([
       "دستورات:",
       "\n\n",
-      "/check",
-      "بررسی وضعیت",
-      "\n",
-      "/classes",
-      "کلاس های در حال برگزاری",
+      [
+        ["/check", "بررسی وضعیت"],
+        ["/classes", "کلاس های در حال برگزاری"],
+        ["/trainings", "تمرین ها"],
+        ["/events", "رویداد ها"],
+        ["/fal", "فال"],
+      ].map(arr => arr.join('  ')).join("\n"),
     ].join(' '))
 
   else if (msg.text.startsWith('/check'))
@@ -168,35 +176,53 @@ bot.on("message", (msg) => {
       "عهههههه دارم کار میکنم",
       "چییییههه؟",
       "ساکت لطفا",
+      "...",
+      "هعی",
     ])[0])
 
-  else if (msg.text.startsWith('/classes') ){
+  else if (msg.text.startsWith('/classes')) {
     let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
     send([
-      "هم اکنون",
-      currentClasses.length,
-      "کلاس در حال برگزاری است",
-      "\n\n-----------------------\n",
-      "کلاس ها:",
+      [
+        "هم اکنون",
+        currentClasses.length,
+        "کلاس در حال برگزاری است",
+      ].join(' '),
+      border,
+      currentClasses.map(cls => `\n- ${getClassShortInfo(cls)}`).join("\n")
+    ].join('\n'))
+  }
+
+  else if (msg.text.startsWith('/trainings')) {
+    let trArray = object2array(trainings)
+
+    send([
+      "تعداد",
+      trArray.length,
+      "تمرین موجود میباشد",
       "\n",
-      currentClasses.map((cls, i) => `\n${i+1} -> ${getClassShortInfo(cls)}`).join("\n")
-    ].join(' '))
+      trArray.map(tr => applyBorder(getTraningInfo(tr, classes))).join("\n\n")
+    ].join(" "))
+  }
+
+  else if (msg.text.startsWith('/events')) {
+    let evArray = object2array(events)
+
+    send([
+      "تعداد",
+      evArray.length,
+      "رویداد وجود دارد",
+      "\n",
+      evArray.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
+    ].join(" "))
   }
 })
 
 // --------------------------------
 
-
-let lastClassIds = []
-
-function getClassShortInfo(cls) {
-  return [
-    "کلاس",
-    cls["lesson"],
-    "با",
-    cls["teacher"]
-  ].join(' ')
-}
+let
+  lastClassIds = [],
+  lastBeforeClassIds = []
 
 function currentClassIds(now) {
   let classTimeIndex = getClassTimeIndex(now.mtime, classTimes)
@@ -212,20 +238,35 @@ function currentClassIds(now) {
 function task() {
   console.log('task')
 
-  let newClassIds = currentClassIds(getCurrentWeekTimeInfo())
+  let
+    newClassIds = currentClassIds(getCurrentWeekTimeInfo()),
+    newBeforeClassIds = currentClassIds(getCurrentWeekTimeInfo(moment.duration(15, "minutes")))
 
-  for (const clsId of difference(newClassIds, lastClassIds)) {
-    const cls = classes[clsId]
+  for (const clsId of difference(newClassIds, lastClassIds))
     send2Group([
-      getClassShortInfo(cls),
+      getClassShortInfo(classes[clsId]),
       "در حال برگزاری است",
     ].join(' '))
-  }
+
+  for (const clsId of difference(newBeforeClassIds, lastBeforeClassIds))
+    send2Group([
+      getClassShortInfo(classes[clsId]),
+      "دقایقی دیگر برگزار میشود",
+    ].join(' '))
 
   lastClassIds = newClassIds
+  lastBeforeClassIds = newBeforeClassIds
 }
 
 function runScheduler() {
   task()
   return setInterval(task, 60 * 1000)
 }
+
+// ----------------------------
+
+app.listen(3000, async () => {
+  console.log('running ...')
+  await updateData()
+  runScheduler()
+})

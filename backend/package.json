@@ -13,9 +13,11 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "jalaali-js": "^1.2.3",
     "moment": "^2.29.1",
     "mongodb": "^4.1.2",
     "node-telegram-bot-api": "^0.54.0",
+    "persian-number": "^1.5.1",
     "pick-random": "^4.0.0",
     "set-operations": "^1.2.1",
     "telegraf": "^4.4.2",

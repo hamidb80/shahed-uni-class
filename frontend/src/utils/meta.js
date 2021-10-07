@@ -1,4 +1,4 @@
-import { convertLatin2PersianDigits } from "./persian";
+import { convertEnToPe } from "persian-number";
 
 
 export const
@@ -11,7 +11,7 @@ export const
     "15 - 16:30",
     "16:30 - 18",
     "18 - 19:30",
-  ].map(convertLatin2PersianDigits),
+  ].map(convertEnToPe),
 
   weekDays = [
     "شنبه",

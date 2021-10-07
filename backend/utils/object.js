@@ -21,3 +21,12 @@ export function objecFilter(object, fn) {
 
   return result
 }
+
+export function arr2object(array, keyGetterFn) {
+  let object = {}
+
+  for (const item of array)
+    object[keyGetterFn(item)] = item
+
+  return object
+}

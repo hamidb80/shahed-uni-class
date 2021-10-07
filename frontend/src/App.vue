@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <div :class="['overly', { active: showMenu }]">
-      <div class="forms" v-if="form && showMenu">
+  <div class="wrapper">
+    <div :class="['overly', { active: form || showMenu }]">
+      <div class="forms" v-if="form">
         <div v-if="loading" class="loading">صبر کنید ...</div>
         <login-form v-else-if="form === 'login'" @submit="login" />
         <class-form
@@ -10,6 +10,14 @@
           :isAdmin="isVerifed"
           @delete="deleteClass"
           @createOrUpadte="createOrUpadteClass"
+        />
+        <training-form
+          v-else-if="form === 'training'"
+          :data="selectedTrainingId ? trainings[selectedTrainingId] : {}"
+          :isAdmin="isVerifed"
+          :classes="classes"
+          @delete="deleteEvent"
+          @createOrUpadte="createOrUpadteEvent"
         />
       </div>
     </div>
@@ -44,7 +52,7 @@
               class="class"
               v-for="clsId in time"
               :key="clsId"
-              @click="clickOnClass(clsId)"
+              @click="clickOnItem('class', clsId)"
             >
               {{ classes[clsId].lesson }}
             </div>
@@ -54,31 +62,80 @@
       </div>
     </div>
 
+    <section>
+      <header>
+        <h2>تمرین ها</h2>
+      </header>
+      <table class="tranings">
+        <tr>
+          <th>نام</th>
+          <th>کلاس</th>
+          <th>استاد</th>
+          <th>تاریخ تحویل</th>
+        </tr>
+        <tr
+          v-for="(tr, id) in trainings"
+          :key="id"
+          @click="clickOnItem('training', id)"
+        >
+          <td>{{ tr["name"] }}</td>
+          <td>{{ classes[tr["classId"]]["lesson"] }}</td>
+          <td>{{ classes[tr["classId"]]["teacher"] }}</td>
+          <td>{{ new Date(tr["datetime"]).toLocaleDateString("fa-IR") }}</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <header>
+        <h2>رویداد ها</h2>
+      </header>
+
+      <table class="events">
+        <tr>
+          <th>نام</th>
+          <th>کلاس</th>
+          <th>تاریخ</th>
+        </tr>
+        <tr v-for="ev in events" :key="ev['_id']">
+          <td>{{ ev["name"] }}</td>
+          <td>{{ ev["classId"] }}</td>
+          <td>{{ ev["datetime"] }}</td>
+        </tr>
+      </table>
+    </section>
+
     <footer class="app-footer">
       <div class="tool-bar">
-        <div
-          class="btn"
-          @click="
-            showMenu = !showMenu;
-            form = '';
-          "
-        >
-          <closeI v-if="showMenu" class="icon" />
-          <moreI v-else class="icon" />
+        <div>
+          <div v-if="!(form || showMenu)" class="btn" @click="showMenu = true">
+            <moreI class="icon" />
+          </div>
+          <div v-else class="btn" @click="closeMenu">
+            <closeI class="icon" />
+          </div>
         </div>
 
-        <template v-if="showMenu">
-          <div class="btn" v-if="isVerifed" @click="changeForm('class')">
-            <schoolI class="icon" />
-          </div>
-          <template v-else>
-            <div class="btn" @click="changeForm('login')">
-              <loginI class="icon" />
+        <div v-if="showMenu && !form">
+          <div v-if="isVerifed">
+            <div class="btn" @click="changeForm('class')">
+              <schoolI class="icon" />
             </div>
-          </template>
-        </template>
+            <div class="btn" @click="changeForm('training')">
+              <bookI class="icon" />
+            </div>
+            <div class="btn" @click="changeForm('event')">
+              <calendarI class="icon" />
+            </div>
+          </div>
+          <div v-else class="btn" @click="changeForm('login')">
+            <loginI class="icon" />
+          </div>
+        </div>
       </div>
     </footer>
+
+    <div class="bottom-space"></div>
   </div>
 </template>
 
@@ -90,17 +147,20 @@ import loginI from "./icons/vue/login.vue";
 import moreI from "./icons/vue/more.vue";
 import schoolI from "./icons/vue/school.vue";
 import closeI from "./icons/vue/close.vue";
+import bookI from "./icons/vue/book.vue";
+import calendarI from "./icons/vue/calendar.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
+import trainingF from "./forms/training.vue";
 
 const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
-      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
-      : // ? "http://localhost:3000/api/" :
-        "/api/",
-  timeout: 10 * 1000,
+      ? // ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
+        "http://localhost:3000/api/"
+      : "/api/",
+  timeout: 60 * 1000,
 });
 
 export default {
@@ -110,9 +170,13 @@ export default {
     moreI,
     schoolI,
     closeI,
+    bookI,
+
+    calendarI,
 
     "class-form": classF,
     "login-form": loginF,
+    "training-form": trainingF,
   },
 
   data: () => ({
@@ -125,9 +189,13 @@ export default {
     secretKey: "",
 
     selectedClassId: "",
+    selectedTrainingId: "",
+    selectedEventId: "",
 
     classes: {}, // classId => class{teacher, lesson, program}
     program: [],
+    trainings: {},
+    events: {},
 
     maxDaysClasses: [], // array of int
 
@@ -145,10 +213,12 @@ export default {
   },
 
   methods: {
-    clickOnClass(classId) {
+    clickOnItem(formName, itemId) {
       this.showMenu = true;
-      this.form = "class";
-      this.selectedClassId = classId;
+      this.form = formName;
+
+      if (formName === "class") this.selectedClassId = itemId;
+      else if (formName === "training") this.selectedTrainingId = itemId;
     },
 
     changeForm(formName) {
@@ -163,6 +233,8 @@ export default {
       let res = await httpClient.post("/verify", { secretKey }, this.reqCfg);
       this.isVerifed = res.data["result"];
 
+      this.form = "";
+      this.showMenu = false;
       this.loading = false;
     },
 
@@ -175,7 +247,6 @@ export default {
 
       await this.update();
     },
-
     async deleteClass(classId) {
       this.loading = true;
       this.selectedClassId = "";
@@ -184,18 +255,43 @@ export default {
       await this.update();
     },
 
+    async createOrUpadteEvent(trId, trainingObject) {
+      this.loading = true;
+
+      if (trId)
+        await httpClient.put(`/event/${trId}`, trainingObject, this.reqCfg);
+      else await httpClient.post("/event", trainingObject, this.reqCfg);
+
+      await this.update();
+    },
+    async deleteEvent(trId) {
+      this.loading = true;
+      this.selectedTrainingId = "";
+
+      await httpClient.delete(`/event/${trId}`, this.reqCfg);
+      await this.update();
+    },
+
     async update() {
       this.loading = true;
 
       let res = await httpClient.get("/getAll");
+
       this.classes = res.data.classes;
       this.program = res.data.program;
+      this.trainings = res.data.trainings;
+      this.events = res.data.events;
 
       this.maxDaysClasses = this.program.map((dayProgram) =>
         Math.max(...dayProgram.map((time) => time.length))
       );
 
       this.loading = false;
+    },
+
+    closeMenu() {
+      this.showMenu = false;
+      this.form = "";
     },
   },
 
@@ -369,6 +465,51 @@ export default {
   }
 }
 
+section {
+  margin-top: 40px;
+  .px(16px);
+
+  header {
+    h2 {
+      .fa();
+    }
+  }
+
+  table {
+    direction: rtl;
+    width: 100%;
+    border-collapse: collapse;
+
+    tr {
+      td,
+      th {
+        border: 1px solid #565656;
+        text-align: center;
+        .fa();
+      }
+
+      &:nth-child(even) {
+        background-color: #f3f3f3;
+      }
+
+      &:first-child {
+        background-color: #212121;
+        color: white;
+      }
+      &:hover {
+        cursor: pointer;
+        td {
+          background-color: #ffecc8;
+        }
+      }
+    }
+  }
+
+  @media screen and (max-width: @mobile-width) {
+    .px(0);
+  }
+}
+
 .app-footer {
   position: fixed;
   bottom: 0;
@@ -399,6 +540,10 @@ export default {
       }
     }
   }
+}
+
+.bottom-space {
+  margin-top: 100px;
 }
 
 .overly {
