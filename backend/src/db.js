@@ -42,3 +42,11 @@ export async function remove(collectionName, id, hookfn) {
   if (hookfn) await hookfn()
   return result
 }
+
+export async function removeMany(collectionName, props, hookfn) {
+  let result = await runQuery(
+    async () => await db.collection(collectionName).deleteMany(props))
+
+  if (hookfn) await hookfn()
+  return result
+}

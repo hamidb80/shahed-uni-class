@@ -9,7 +9,7 @@ import moment from 'moment'
 
 import { validateClass, validateEvent } from './types.js'
 import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder } from './serialize.js'
-import { db, COLLECTIONS, runQuery, upsert, remove } from './db.js'
+import { db, COLLECTIONS, runQuery, upsert, remove, removeMany } from './db.js'
 import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
 import { spliceArray, object2array } from '../utils/array.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
@@ -118,6 +118,7 @@ app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
     res.status(400).send(errors)
 }))
 app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
+  await removeMany(COLLECTIONS.events, { "classId": req.params.cid })
   res.send(await remove(COLLECTIONS.classes, req.params.cid, updateData))
 }))
 

@@ -6,7 +6,8 @@
   "main": "main.js",
   "scripts": {
     "start": "node src/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "publish": "fandogh image publish --version 0.1",
+    "deploy": "fandogh service apply -f fandogh.yml"
   },
   "author": "hamidb80",
   "license": "MIT",
