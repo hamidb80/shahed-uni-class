@@ -1,5 +1,3 @@
-@REM build the front and copies the built filed into backned's dist folder
-
 call cd "../frontend "
 call yarn.cmd build
 
