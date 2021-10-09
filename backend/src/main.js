@@ -154,7 +154,7 @@ function send2Group(msg) {
   bot.sendMessage(GROUP_CHATID, msg)
 }
 
-bot.on("message", (msg) => {
+bot.on("message", async (msg) => {
   function send(text) {
     bot.sendMessage(msg.chat.id, text)
   }
