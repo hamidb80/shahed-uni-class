@@ -16,6 +16,9 @@ import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 
+import axios from 'axios'
+import nodehtml from 'node-html-parser'
+
 // init services --------------------------
 const __dirname = path.resolve()
 
@@ -217,6 +220,10 @@ bot.on("message", (msg) => {
       evArray.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
     ].join(" "))
   }
+  else if(msg.text.startsWith('/fal'))
+  {
+    send(['fal shoma \n ', fal()].join('\n '))
+  }
 })
 
 // --------------------------------
@@ -264,6 +271,16 @@ function runScheduler() {
   return setInterval(task, 60 * 1000)
 }
 
+ async function fal() {
+    const parse = nodehtml.parse
+    let respose = await axios.get('https://c.ganjoor.net/beyt.php')
+    let page = parse(respose.data)
+    let first_element = page.querySelectorAll('.ganjoor-m1').map(el => el.text)
+    let second_element = page.querySelectorAll('.ganjoor-m2').map(el => el.text)
+    first_element = first_element.toString()
+    let Random_beyt = first_element + "  ***  " + second_element
+    return Random_beyt
+}
 // ----------------------------
 
 app.listen(3000, async () => {
@@ -271,3 +288,4 @@ app.listen(3000, async () => {
   await updateData()
   runScheduler()
 })
+
