@@ -222,7 +222,7 @@ bot.on("message", (msg) => {
   }
   else if(msg.text.startsWith('/fal'))
   {
-    send([':فال شما \n ', awiat fal()].join('\n '))
+    send([':فال شما \n ', await fal()].join('\n '))
   }
 })
 
