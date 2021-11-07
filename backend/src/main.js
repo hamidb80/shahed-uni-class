@@ -171,6 +171,7 @@ bot.on("message", async (msg) => {
         ["/trainings", "تمرین ها"],
         ["/events", "رویداد ها"],
         ["/fal", "فال"],
+        ["/hadis"."حدیث امروز"]
       ].map(arr => arr.join('  ')).join("\n"),
     ].join(' '))
 
@@ -225,6 +226,8 @@ bot.on("message", async (msg) => {
   else if (msg.text.startsWith('/fal')) {
     send(['فال شما: \n ', await fal()].join('\n '))
   }
+  else if (msg.text.startsWith('/hadis')) {
+    send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '))
 })
 
 // --------------------------------
