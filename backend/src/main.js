@@ -171,7 +171,7 @@ bot.on("message", async (msg) => {
         ["/trainings", "تمرین ها"],
         ["/events", "رویداد ها"],
         ["/fal", "فال"],
-        ["/hadis"."حدیث امروز"]
+        ["/hadis", "حدیث امروز"],
       ].map(arr => arr.join('  ')).join("\n"),
     ].join(' '))
 
@@ -228,6 +228,7 @@ bot.on("message", async (msg) => {
   }
   else if (msg.text.startsWith('/hadis')) {
     send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '))
+  }
 })
 
 // --------------------------------
@@ -285,17 +286,16 @@ async function fal() {
   return Random_beyt
 }
 //hadith function
-  async function HadithOfDay(){ 
-    let respose =  await axios.get('https://www.hadithlib.com/hadithdays')
-    let page = parse(respose.data)
-    let father_queryselector =page.querySelectorAll('.leftboxs1 > div:nth-child(3) > table >  tr:nth-child(2) > td:nth-child(2) > div>div').map(texts =>texts.text)
-    let final
-    for(let i in father_queryselector)
-    {
-        final+=father_queryselector[i].toString()
-    }
-    
-   return final
+async function HadithOfDay() {
+  let respose = await axios.get('https://www.hadithlib.com/hadithdays')
+  let page = parse(respose.data)
+  let father_queryselector = page.querySelectorAll('.leftboxs1 > div:nth-child(3) > table >  tr:nth-child(2) > td:nth-child(2) > div>div').map(texts => texts.text)
+  let final = ""
+  for (let i in father_queryselector) {
+    final += father_queryselector[i].toString()
+  }
+
+  return final
 }
 // ----------------------------
 
