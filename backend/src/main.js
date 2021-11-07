@@ -18,7 +18,7 @@ import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 
 import axios from 'axios'
 import nodehtml from 'node-html-parser'
-
+const parse = nodehtml.parse
 // init services --------------------------
 const __dirname = path.resolve()
 
@@ -223,7 +223,7 @@ bot.on("message", async (msg) => {
     ].join(" "))
   }
   else if (msg.text.startsWith('/fal')) {
-    send([':فال شما \n ', await fal()].join('\n '))
+    send(['فال شما: \n ', await fal()].join('\n '))
   }
 })
 
@@ -273,7 +273,6 @@ function runScheduler() {
 }
 
 async function fal() {
-  const parse = nodehtml.parse
   let respose = await axios.get('https://c.ganjoor.net/beyt.php')
   let page = parse(respose.data)
   let first_element = page.querySelectorAll('.ganjoor-m1').map(el => el.text)
@@ -281,6 +280,19 @@ async function fal() {
   first_element = first_element.toString()
   let Random_beyt = first_element + "  ***  " + second_element
   return Random_beyt
+}
+//hadith function
+  async function HadithOfDay(){ 
+    let respose =  await axios.get('https://www.hadithlib.com/hadithdays')
+    let page = parse(respose.data)
+    let father_queryselector =page.querySelectorAll('.leftboxs1 > div:nth-child(3) > table >  tr:nth-child(2) > td:nth-child(2) > div>div').map(texts =>texts.text)
+    let final
+    for(let i in father_queryselector)
+    {
+        final+=father_queryselector[i].toString()
+    }
+    
+   return final
 }
 // ----------------------------
 
