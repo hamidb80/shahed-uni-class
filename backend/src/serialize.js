@@ -1,4 +1,4 @@
-import { toPersianDate } from '../utils/time.js'
+import { toPersianDate, persianWeekDays } from '../utils/time.js'
 
 export function getClassShortInfo(cls) {
   return [
@@ -9,19 +9,25 @@ export function getClassShortInfo(cls) {
   ].join(' ')
 }
 
+function getDateWithWeekDay(datetime) {
+  return toPersianDate(datetime) + "  " + persianWeekDays(datetime.getDay())
+}
+
 export function getTraningInfo(tr, classesObject) {
+  let datetime = new Date(tr["datetime"])
   return [
     ["عنوان", tr["name"]],
-    ["تاریخ تحویل", toPersianDate(new Date(tr["datetime"]))],
+    ["تاریخ تحویل", getDateWithWeekDay(datetime)],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
   ].map(arr => arr.join(': ')).join('\n')
 }
 
 export function getEventInfo(tr, classesObject) {
+  let datetime = new Date(tr["datetime"])
   return [
     ["عنوان", tr["name"]],
-    ["تاریخ", toPersianDate(new Date(tr["datetime"]))],
+    ["تاریخ", getDateWithWeekDay(datetime)],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
   ].map(arr => arr.join(': ')).join('\n')

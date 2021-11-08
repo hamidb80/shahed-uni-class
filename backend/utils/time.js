@@ -51,8 +51,22 @@ export function getClassTimeIndex(mCurentTime, timeRanges) {
   return timeRanges.findIndex(mtRng => isBetween(mCurentTime, ...mtRng))
 }
 
+export function clockNumber(n) {
+  return n < 10 ? "0" + n : toString(n)
+}
+
 export function toPersianDate(datetime) {
   let jdate = jalaali.toJalaali(datetime)
   return PN.convertEnToPe(
-    `${jdate.jy}/${jdate.jm}/${jdate.jd} | ${datetime.getHours()}:${datetime.getMinutes()}`)
+    `${clockNumber(jdate.jy)}/${clockNumber(jdate.jm)}/${clockNumber(jdate.jd)} | ${clockNumber(datetime.getHours())}:${clockNumber(datetime.getMinutes())}`)
 }
+
+export const persianWeekDays = [
+  "یکشنبه",
+  "دو شنبه",
+  "شنبه سه",
+  "چهار شنبه",
+  "پنج شنبه",
+  "جمعه",
+  "شنبه",
+]
