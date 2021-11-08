@@ -230,7 +230,7 @@ bot.on("message", async (msg) => {
     ].join(" "))
   }
   else if (msg.text.startsWith('/fal')) {
-    send(['فال شما: \n ', await fal()].join('\n '), true)
+    send(['فال شما: \n ', markdownEscape(await fal())].join('\n '), true)
   }
   else if (msg.text.startsWith('/hadis')) {
     send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '))
@@ -282,6 +282,9 @@ function runScheduler() {
   return setInterval(task, 60 * 1000)
 }
 
+function markdownEscape(s) {
+  return s.replaceAll("*", "\\*")
+}
 
 function createLink(hover, link) {
   return `[${hover}](${link})`
