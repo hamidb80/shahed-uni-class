@@ -287,11 +287,11 @@ async function fal() {
   let page = parse(respose.data)
   let first_element = page.querySelectorAll('.ganjoor-m1').map(el => el.text)
   let second_element = page.querySelectorAll('.ganjoor-m2').map(el => el.text)
-  first_element = first_element.toString()
-  let Random_beyt = first_element + "  ***  " + second_element
+  let poet = page.querySelectorAll('.ganjoor-poet').map(el => el.text)
+  let Random_beyt = first_element + "  ***  " + second_element + "\n\n" + poet
   return Random_beyt
 }
-//hadith function
+
 async function HadithOfDay() {
   let respose = await axios.get('https://www.hadithlib.com/hadithdays')
   let page = parse(respose.data)
