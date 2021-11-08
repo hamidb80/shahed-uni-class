@@ -63,10 +63,10 @@ export function toPersianDate(datetime) {
 
 export const persianWeekDays = [
   "یکشنبه",
-  "دو شنبه",
-  "شنبه سه",
-  "چهار شنبه",
-  "پنج شنبه",
+  "دوشنبه",
+  "سه شنبه",
+  "چهارشنبه",
+  "پنجشنبه",
   "جمعه",
   "شنبه",
 ]
