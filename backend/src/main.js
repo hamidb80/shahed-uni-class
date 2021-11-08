@@ -30,7 +30,7 @@ app.use(express.static('./dist'))
 
 const
   bot = new TelegramBot(TG_TOKEN, { polling: true }),
-  MSG_OPTIONS = { parse_mode: "MarkdownV2" }
+  MSG_OPTIONS = {}
 // app data ------------------------------------
 
 let
@@ -162,7 +162,7 @@ function send2Group(msg) {
 
 bot.on("message", async (msg) => {
   function send(text) {
-    bot.sendMessage(msg.chat.id, text,MSG_OPTIONS)
+    bot.sendMessage(msg.chat.id, text, MSG_OPTIONS)
   }
 
   if (!msg.text) return
