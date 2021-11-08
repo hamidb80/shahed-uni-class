@@ -161,8 +161,8 @@ function send2Group(msg) {
 }
 
 bot.on("message", async (msg) => {
-  function send(text) {
-    bot.sendMessage(msg.chat.id, text, MSG_OPTIONS)
+  function send(text, markdown = false) {
+    bot.sendMessage(msg.chat.id, text, { ...MSG_OPTIONS, parse_mode: markdown ? "MarkdownV2" : undefined })
   }
 
   if (!msg.text) return
@@ -230,7 +230,7 @@ bot.on("message", async (msg) => {
     ].join(" "))
   }
   else if (msg.text.startsWith('/fal')) {
-    send(['فال شما: \n ', await fal()].join('\n '))
+    send(['فال شما: \n ', await fal()].join('\n '), true)
   }
   else if (msg.text.startsWith('/hadis')) {
     send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '))
@@ -282,13 +282,18 @@ function runScheduler() {
   return setInterval(task, 60 * 1000)
 }
 
+
+function createLink(hover, link) {
+  return `[${hover}](${link})`
+}
+
 async function fal() {
   let respose = await axios.get('https://c.ganjoor.net/beyt.php')
   let page = parse(respose.data)
-  let first_element = page.querySelectorAll('.ganjoor-m1').map(el => el.text)
-  let second_element = page.querySelectorAll('.ganjoor-m2').map(el => el.text)
-  let poet = page.querySelectorAll('.ganjoor-poet').map(el => el.text)
-  let Random_beyt = first_element + "  ***  " + second_element + "\n\n" + poet
+  let first_element = page.querySelector('.ganjoor-m1').text
+  let second_element = page.querySelector('.ganjoor-m2').text
+  let poetEl = page.querySelector('.ganjoor-poet a')
+  let Random_beyt = first_element + "  ***  " + second_element + "\n\n" + createLink(poetEl.text, poetEl.getAttribute("href"))
   return Random_beyt
 }
 
