@@ -57,6 +57,7 @@ function processData(classesArray, eventArray) {
           .map(cls => cls["_id"])
     }
   }
+  eventArray.sort((a, b) => a.datetime < b.datetime ? -1 : +1)
 
   classes = arr2object(classesArray, cls => cls["_id"])
 
@@ -304,4 +305,3 @@ app.listen(3000, async () => {
   await updateData()
   runScheduler()
 })
-
