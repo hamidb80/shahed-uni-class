@@ -19,6 +19,7 @@ import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 import axios from 'axios'
 import nodehtml from 'node-html-parser'
 const parse = nodehtml.parse
+
 // init services --------------------------
 const __dirname = path.resolve()
 
@@ -27,8 +28,9 @@ app.use(cors())
 app.use(express.json())
 app.use(express.static('./dist'))
 
-const bot = new TelegramBot(TG_TOKEN, { polling: true })
-
+const
+  bot = new TelegramBot(TG_TOKEN, { polling: true }),
+  MSG_OPTIONS = { parse_mode: "MarkdownV2" }
 // app data ------------------------------------
 
 let
@@ -110,7 +112,10 @@ app.post('/api/update', checkSecretKey(async (req, res) => {
 app.post('/api/class', checkSecretKey(async (req, res) => {
   let errors = validateClass(req.body)
   if (errors.length === 0)
-    res.send(await upsert(COLLECTIONS.classes, req.body, undefined, updateData))
+    res.send(await upsert(COLLECTIONS.classes, req.body, undefined, () => {
+      updateData()
+      send2Group("")
+    }))
   else
     res.status(400).send(errors)
 }))
@@ -152,12 +157,12 @@ app.post('/api/bot/', checkSecretKey((req, res) => {
 }))
 
 function send2Group(msg) {
-  bot.sendMessage(GROUP_CHATID, msg)
+  bot.sendMessage(GROUP_CHATID, msg, MSG_OPTIONS)
 }
 
 bot.on("message", async (msg) => {
   function send(text) {
-    bot.sendMessage(msg.chat.id, text)
+    bot.sendMessage(msg.chat.id, text,MSG_OPTIONS)
   }
 
   if (!msg.text) return
