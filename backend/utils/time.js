@@ -52,7 +52,7 @@ export function getClassTimeIndex(mCurentTime, timeRanges) {
 }
 
 export function clockNumber(n) {
-  return n < 10 ? "0" + n : toString(n)
+  return n < 10 ? "0" + n : n + ""
 }
 
 export function toPersianDate(datetime) {

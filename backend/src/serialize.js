@@ -10,7 +10,7 @@ export function getClassShortInfo(cls) {
 }
 
 function getDateWithWeekDay(datetime) {
-  return toPersianDate(datetime) + "  " + persianWeekDays(datetime.getDay())
+  return toPersianDate(datetime) + "  " + persianWeekDays[datetime.getDay()]
 }
 
 export function getTraningInfo(tr, classesObject) {
