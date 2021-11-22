@@ -231,7 +231,7 @@ bot.on("message", async (msg) => {
       ].join(" "))
     }
     else if (msg.text.startsWith('/fal')) {
-      send(['فال شما: \n ', markdownEscape(await fal())].join('\n '), true)
+      send(['فال شما: \n ', markdownV2Escape(await fal())].join('\n '), true)
     }
     else if (msg.text.startsWith('/hadis')) {
       send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '), true)
@@ -284,8 +284,10 @@ function runScheduler() {
   return setInterval(task, 60 * 1000)
 }
 
-function markdownEscape(s) {
-  return s.replaceAll("*", "\\*")
+function markdownV2Escape(s) {
+  return s.replace(
+    /([_*\[\]()~`>#+-=|{}.!])/g, "\\$1"
+  )
 }
 
 function createLink(hover, link) {
@@ -311,9 +313,9 @@ async function HadithOfDay() {
     text = extractKeys(resp.data["data"], ["qael", "translateShortText"]).join("\n"),
     hadisId = resp.data["data"]["hadithId"]
 
-  return [text, createLink("منبع", genHadisLink(hadisId))].join("\n\n")
+  return [markdownV2Escape(text), createLink("منبع", genHadisLink(hadisId))].join("\n\n")
 }
-console.log(await HadithOfDay())
+
 // ----------------------------
 
 app.listen(3000, async () => {
