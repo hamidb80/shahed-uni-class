@@ -234,7 +234,7 @@ bot.on("message", async (msg) => {
       send(['فال شما: \n ', markdownEscape(await fal())].join('\n '), true)
     }
     else if (msg.text.startsWith('/hadis')) {
-      send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '))
+      send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '), true)
     }
   } catch (e) { }
 })
