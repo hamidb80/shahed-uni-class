@@ -22,6 +22,10 @@ export function objecFilter(object, fn) {
   return result
 }
 
+export function extractKeys(object, keys) {
+  return keys.map(k => object[k])
+}
+
 export function arr2object(array, keyGetterFn) {
   let object = {}
 

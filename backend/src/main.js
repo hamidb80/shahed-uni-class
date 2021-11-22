@@ -166,75 +166,77 @@ bot.on("message", async (msg) => {
   }
 
   if (!msg.text) return
+  try {
 
-  if (msg.text.startsWith('/start'))
-    send([
-      "دستورات:",
-      "\n\n",
-      [
-        ["/check", "بررسی وضعیت"],
-        ["/classes", "کلاس های در حال برگزاری"],
-        ["/trainings", "تمرین ها"],
-        ["/events", "رویداد ها"],
-        ["/fal", "فال"],
-        ["/hadis", "حدیث امروز"],
-      ].map(arr => arr.join('  ')).join("\n"),
-    ].join(' '))
+    if (msg.text.startsWith('/start'))
+      send([
+        "دستورات:",
+        "\n\n",
+        [
+          ["/check", "بررسی وضعیت"],
+          ["/classes", "کلاس های در حال برگزاری"],
+          ["/trainings", "تمرین ها"],
+          ["/events", "رویداد ها"],
+          ["/fal", "فال"],
+          ["/hadis", "حدیث امروز"],
+        ].map(arr => arr.join('  ')).join("\n"),
+      ].join(' '))
 
-  else if (msg.text.startsWith('/check'))
-    send(pickRandom([
-      "جانم فدایتان اعلی حضرت",
-      "شما امر بفرما",
-      "حواسمو پرت نکن",
-      "عهههههه دارم کار میکنم",
-      "چییییههه؟",
-      "ساکت لطفا",
-      "...",
-      "هعی",
-    ])[0])
+    else if (msg.text.startsWith('/check'))
+      send(pickRandom([
+        "جانم فدایتان اعلی حضرت",
+        "شما امر بفرما",
+        "حواسمو پرت نکن",
+        "عهههههه دارم کار میکنم",
+        "چییییههه؟",
+        "ساکت لطفا",
+        "...",
+        "هعی",
+      ])[0])
 
-  else if (msg.text.startsWith('/classes')) {
-    let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
-    send([
-      [
-        "هم اکنون",
-        currentClasses.length,
-        "کلاس در حال برگزاری است",
-      ].join(' '),
-      border,
-      currentClasses.map(cls => `\n- ${getClassShortInfo(cls)}`).join("\n")
-    ].join('\n'))
-  }
+    else if (msg.text.startsWith('/classes')) {
+      let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
+      send([
+        [
+          "هم اکنون",
+          currentClasses.length,
+          "کلاس در حال برگزاری است",
+        ].join(' '),
+        border,
+        currentClasses.map(cls => `\n- ${getClassShortInfo(cls)}`).join("\n")
+      ].join('\n'))
+    }
 
-  else if (msg.text.startsWith('/trainings')) {
-    let trArray = object2array(trainings)
+    else if (msg.text.startsWith('/trainings')) {
+      let trArray = object2array(trainings)
 
-    send([
-      "تعداد",
-      trArray.length,
-      "تمرین موجود میباشد",
-      "\n",
-      trArray.map(tr => applyBorder(getTraningInfo(tr, classes))).join("\n\n")
-    ].join(" "))
-  }
+      send([
+        "تعداد",
+        trArray.length,
+        "تمرین موجود میباشد",
+        "\n",
+        trArray.map(tr => applyBorder(getTraningInfo(tr, classes))).join("\n\n")
+      ].join(" "))
+    }
 
-  else if (msg.text.startsWith('/events')) {
-    let evArray = object2array(events)
+    else if (msg.text.startsWith('/events')) {
+      let evArray = object2array(events)
 
-    send([
-      "تعداد",
-      evArray.length,
-      "رویداد وجود دارد",
-      "\n",
-      evArray.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
-    ].join(" "))
-  }
-  else if (msg.text.startsWith('/fal')) {
-    send(['فال شما: \n ', markdownEscape(await fal())].join('\n '), true)
-  }
-  else if (msg.text.startsWith('/hadis')) {
-    send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '))
-  }
+      send([
+        "تعداد",
+        evArray.length,
+        "رویداد وجود دارد",
+        "\n",
+        evArray.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
+      ].join(" "))
+    }
+    else if (msg.text.startsWith('/fal')) {
+      send(['فال شما: \n ', markdownEscape(await fal())].join('\n '), true)
+    }
+    else if (msg.text.startsWith('/hadis')) {
+      send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '))
+    }
+  } catch (e) { }
 })
 
 // --------------------------------
@@ -300,17 +302,18 @@ async function fal() {
   return Random_beyt
 }
 
-async function HadithOfDay() {
-  let respose = await axios.get('https://www.hadithlib.com/hadithdays')
-  let page = parse(respose.data)
-  let father_queryselector = page.querySelectorAll('.leftboxs1 > div:nth-child(3) > table >  tr:nth-child(2) > td:nth-child(2) > div>div').map(texts => texts.text)
-  let final = ""
-  for (let i in father_queryselector) {
-    final += father_queryselector[i].toString()
-  }
-
-  return final
+function genHadisLink(hadisId) {
+  return `https://hadith.inoor.ir/fa/hadith/${hadisId}/translate`
 }
+async function HadithOfDay() {
+  let
+    resp = await axios.get('https://hadith.inoor.ir/service/api/hadith/DailyHadith'),
+    text = extractKeys(resp.data["data"], ["qael", "translateShortText"]).join("\n"),
+    hadisId = resp.data["data"]["hadithId"]
+
+  return [text, createLink("منبع", genHadisLink(hadisId))].join("\n\n")
+}
+console.log(await HadithOfDay())
 // ----------------------------
 
 app.listen(3000, async () => {
