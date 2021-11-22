@@ -231,7 +231,7 @@ bot.on("message", async (msg) => {
       ].join(" "))
     }
     else if (msg.text.startsWith('/fal')) {
-      send(['فال شما: \n ', markdownV2Escape(await fal())].join('\n '), true)
+      send(['فال شما: \n ', await fal()].join('\n '), true)
     }
     else if (msg.text.startsWith('/hadis')) {
       send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '), true)
@@ -300,7 +300,7 @@ async function fal() {
   let first_element = page.querySelector('.ganjoor-m1').text
   let second_element = page.querySelector('.ganjoor-m2').text
   let poetEl = page.querySelector('.ganjoor-poet a')
-  let Random_beyt = first_element + "  ***  " + second_element + "\n\n" + createLink(poetEl.text, poetEl.getAttribute("href"))
+  let Random_beyt = markdownV2Escape(first_element + "  ***  " + second_element) + "\n\n" + createLink(poetEl.text, poetEl.getAttribute("href"))
   return Random_beyt
 }
 
