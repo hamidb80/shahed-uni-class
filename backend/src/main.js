@@ -10,7 +10,7 @@ import moment from 'moment'
 import { validateClass, validateEvent } from './types.js'
 import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder } from './serialize.js'
 import { db, COLLECTIONS, runQuery, upsert, remove, removeMany } from './db.js'
-import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
+import { objectMap2Array, objecFilter, arr2object, extractKeys } from '../utils/object.js'
 import { spliceArray, object2array } from '../utils/array.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
 
