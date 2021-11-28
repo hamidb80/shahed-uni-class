@@ -10,18 +10,15 @@ import moment from 'moment'
 import { validateClass, validateEvent } from './types.js'
 import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder } from './serialize.js'
 import { db, COLLECTIONS, runQuery, upsert, remove, removeMany } from './db.js'
-import { objectMap2Array, objecFilter, arr2object, extractKeys } from '../utils/object.js'
+import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
 import { spliceArray, object2array } from '../utils/array.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
+import { bold } from '../utils/tg.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
-
-import axios from 'axios'
-import nodehtml from 'node-html-parser'
-const parse = nodehtml.parse
-
-// init services --------------------------
+import { fal, HadithOfDay } from "./dataCollector.js"
 const __dirname = path.resolve()
+// init services --------------------------
 
 const app = express()
 app.use(cors())
@@ -170,7 +167,7 @@ bot.on("message", async (msg) => {
 
     if (msg.text.startsWith('/start'))
       send([
-        "دستورات:",
+        bold("دستورات:"),
         "\n\n",
         [
           ["/check", "بررسی وضعیت"],
@@ -180,7 +177,7 @@ bot.on("message", async (msg) => {
           ["/fal", "فال"],
           ["/hadis", "حدیث امروز"],
         ].map(arr => arr.join('  ')).join("\n"),
-      ].join(' '))
+      ].join(' '), true)
 
     else if (msg.text.startsWith('/check'))
       send(pickRandom([
@@ -215,8 +212,8 @@ bot.on("message", async (msg) => {
         trArray.length,
         "تمرین موجود میباشد",
         "\n",
-        trArray.map(tr => applyBorder(getTraningInfo(tr, classes))).join("\n\n")
-      ].join(" "))
+        trArray.map(tr => applyBorder(getTraningInfo(tr, classes), true)).join("\n\n")
+      ].join(" "), true)
     }
 
     else if (msg.text.startsWith('/events')) {
@@ -227,8 +224,8 @@ bot.on("message", async (msg) => {
         evArray.length,
         "رویداد وجود دارد",
         "\n",
-        evArray.map(ev => applyBorder(getEventInfo(ev, classes))).join("\n\n")
-      ].join(" "))
+        evArray.map(ev => applyBorder(getEventInfo(ev, classes), true)).join("\n\n")
+      ].join(" "), true)
     }
     else if (msg.text.startsWith('/fal')) {
       send(['فال شما: \n ', await fal()].join('\n '), true)
@@ -257,8 +254,6 @@ function currentClassIds(now) {
 }
 
 function task() {
-  console.log('task')
-
   let
     newClassIds = currentClassIds(getCurrentWeekTimeInfo()),
     newBeforeClassIds = currentClassIds(getCurrentWeekTimeInfo(moment.duration(15, "minutes")))
@@ -279,44 +274,12 @@ function task() {
   lastBeforeClassIds = newBeforeClassIds
 }
 
+// ----------------------------
+
 function runScheduler() {
   task()
   return setInterval(task, 60 * 1000)
 }
-
-function markdownV2Escape(s) {
-  return s.replace(
-    /([_*\[\]()~`>#+-=|{}.!])/g, "\\$1"
-  )
-}
-
-function createLink(hover, link) {
-  return `[${hover}](${link})`
-}
-
-async function fal() {
-  let respose = await axios.get('https://c.ganjoor.net/beyt.php')
-  let page = parse(respose.data)
-  let first_element = page.querySelector('.ganjoor-m1').text
-  let second_element = page.querySelector('.ganjoor-m2').text
-  let poetEl = page.querySelector('.ganjoor-poet a')
-  let Random_beyt = markdownV2Escape(first_element + "  ***  " + second_element) + "\n\n" + createLink(poetEl.text, poetEl.getAttribute("href"))
-  return Random_beyt
-}
-
-function genHadisLink(hadisId) {
-  return `https://hadith.inoor.ir/fa/hadith/${hadisId}/translate`
-}
-async function HadithOfDay() {
-  let
-    resp = await axios.get('https://hadith.inoor.ir/service/api/hadith/DailyHadith'),
-    text = extractKeys(resp.data["data"], ["qael", "translateShortText"]).join("\n"),
-    hadisId = resp.data["data"]["hadithId"]
-
-  return [markdownV2Escape(text), createLink("منبع", genHadisLink(hadisId))].join("\n\n")
-}
-
-// ----------------------------
 
 app.listen(3000, async () => {
   console.log('running ...')

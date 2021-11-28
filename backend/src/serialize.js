@@ -1,16 +1,23 @@
 import { toPersianDate, persianWeekDays } from '../utils/time.js'
+import { bold, italic, markdownV2Escape } from '../utils/tg.js'
 
 export function getClassShortInfo(cls) {
   return [
     "کلاس",
-    cls["lesson"],
+    italic(markdownV2Escape(cls["lesson"])),
     "با",
-    cls["teacher"]
+    italic(markdownV2Escape(cls["teacher"]))
   ].join(' ')
 }
 
 function getDateWithWeekDay(datetime) {
   return toPersianDate(datetime) + "  " + persianWeekDays[datetime.getDay()]
+}
+
+function pairMarkup(arr) {
+  return arr.length == 2 ?
+    `${bold(arr[0])}: ${markdownV2Escape(arr[1])}` :
+    arr[0]
 }
 
 export function getTraningInfo(tr, classesObject) {
@@ -20,7 +27,7 @@ export function getTraningInfo(tr, classesObject) {
     ["تاریخ تحویل", getDateWithWeekDay(datetime)],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
-  ].map(arr => arr.join(': ')).join('\n')
+  ].map(pairMarkup).join('\n')
 }
 
 export function getEventInfo(tr, classesObject) {
@@ -30,10 +37,14 @@ export function getEventInfo(tr, classesObject) {
     ["تاریخ", getDateWithWeekDay(datetime)],
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
-  ].map(arr => arr.join(': ')).join('\n')
+  ].map(pairMarkup).join('\n')
 }
 
-export const border = "------------------"
-export function applyBorder(text) {
-  return [border, text, border].join('\n')
+export const
+  border = "------------------",
+  escapedBorder = markdownV2Escape("------------------")
+
+export function applyBorder(text, escape = false) {
+  const myBorder = escape ? escapedBorder : border
+  return [myBorder, text, myBorder].join('\n')
 }
