@@ -13,7 +13,7 @@ import { db, COLLECTIONS, runQuery, upsert, remove, removeMany } from './db.js'
 import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
 import { spliceArray, object2array } from '../utils/array.js'
 import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
-import { bold } from '../utils/tg.js'
+import { bold, markdownV2Escape } from '../utils/tg.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 import { fal, HadithOfDay } from "./dataCollector.js"
@@ -204,7 +204,9 @@ bot.on("message", async (msg) => {
           "کلاس در حال برگزاری است",
         ].join(' '),
         border,
-        currentClasses.map(cls => `\n- ${getClassShortInfo(cls)}`).join("\n")
+        currentClasses.map(cls => [
+          markdownV2Escape("\n >>  "), getClassShortInfo(cls) ].join('')
+        ).join("\n")
       ].join('\n'), true)
     }
 
