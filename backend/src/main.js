@@ -153,13 +153,17 @@ app.post('/api/bot/', checkSecretKey((req, res) => {
   res.send(req.body)
 }))
 
-function send2Group(msg) {
-  bot.sendMessage(GROUP_CHATID, msg, MSG_OPTIONS)
+function getMsgOption(markdown) {
+  return { ...MSG_OPTIONS, parse_mode: markdown ? "MarkdownV2" : undefined }
+}
+
+function send2Group(msg, markdown = false) {
+  bot.sendMessage(GROUP_CHATID, msg, getMsgOption(markdown))
 }
 
 bot.on("message", async (msg) => {
   function send(text, markdown = false) {
-    bot.sendMessage(msg.chat.id, text, { ...MSG_OPTIONS, parse_mode: markdown ? "MarkdownV2" : undefined })
+    bot.sendMessage(msg.chat.id, text, getMsgOption(markdown))
   }
 
   if (!msg.text) return
@@ -201,7 +205,7 @@ bot.on("message", async (msg) => {
         ].join(' '),
         border,
         currentClasses.map(cls => `\n- ${getClassShortInfo(cls)}`).join("\n")
-      ].join('\n'))
+      ].join('\n'), true)
     }
 
     else if (msg.text.startsWith('/trainings')) {
@@ -262,13 +266,13 @@ function task() {
     send2Group([
       getClassShortInfo(classes[clsId]),
       "در حال برگزاری است",
-    ].join(' '))
+    ].join(' '), true)
 
   for (const clsId of difference(newBeforeClassIds, lastBeforeClassIds))
     send2Group([
       getClassShortInfo(classes[clsId]),
       "دقایقی دیگر برگزار میشود",
-    ].join(' '))
+    ].join(' '), true)
 
   lastClassIds = newClassIds
   lastBeforeClassIds = newBeforeClassIds
