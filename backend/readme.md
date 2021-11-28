@@ -1,3 +1,9 @@
+# Commands
+## run demo
+```
+npm run demo
+``` 
+
 ## publish image to fandogh
 ```
 npm run image VERSION
