@@ -256,7 +256,11 @@ function currentClassIds(now) {
       classes,
       (_, cls) => cls.program[now.dayIndex].includes(classTimeIndex)
     ),
-    (id, cls) => id)
+    (id, _) => id)
+}
+
+function resolveClassInfo(clsId, index) {
+  return `${index + 1} \\. ${getClassShortInfo(classes[clsId])}`
 }
 
 function task() {
@@ -266,26 +270,22 @@ function task() {
 
   // ---------------------------------
 
-  let presentClassList = difference(newClassIds, lastClassIds).map(clsId =>
-    getClassShortInfo(classes[clsId]))
-
-  if (presentClassList.length)
-    send2Group([
-      "در حال برگزاری است",
-      "\n",
-      ...presentClassList,
-    ].join("\n"), true)
-
-
-  let prepareClassList = difference(newBeforeClassIds, lastBeforeClassIds).map(clsId =>
-    getClassShortInfo(classes[clsId]))
-
+  let prepareClassList = difference(newBeforeClassIds, lastBeforeClassIds, true).map(resolveClassInfo)
   if (prepareClassList.length)
     send2Group([
       "دقایقی دیگر برگزار میشود",
       "\n",
       ...prepareClassList,
     ].join('\n'), true)
+
+
+  let presentClassList = difference(newClassIds, lastClassIds, true).map(resolveClassInfo)
+  if (presentClassList.length)
+    send2Group([
+      "در حال برگزاری است",
+      "\n",
+      ...presentClassList,
+    ].join("\n"), true)
 
   // --------------------------------
 
