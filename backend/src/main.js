@@ -8,7 +8,7 @@ import { difference } from "set-operations"
 import moment from 'moment'
 
 import { validateClass, validateEvent } from './types.js'
-import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder } from './serialize.js'
+import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder, escapedBorder } from './serialize.js'
 import { db, COLLECTIONS, runQuery, upsert, remove, removeMany } from './db.js'
 import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
 import { spliceArray, object2array } from '../utils/array.js'
@@ -203,9 +203,9 @@ bot.on("message", async (msg) => {
           currentClasses.length,
           "کلاس در حال برگزاری است",
         ].join(' '),
-        border,
+        escapedBorder,
         currentClasses.map(cls => [
-          markdownV2Escape("\n >>  "), getClassShortInfo(cls) ].join('')
+          markdownV2Escape("\n >>  "), getClassShortInfo(cls)].join('')
         ).join("\n")
       ].join('\n'), true)
     }
@@ -264,17 +264,30 @@ function task() {
     newClassIds = currentClassIds(getCurrentWeekTimeInfo()),
     newBeforeClassIds = currentClassIds(getCurrentWeekTimeInfo(moment.duration(15, "minutes")))
 
-  for (const clsId of difference(newClassIds, lastClassIds))
-    send2Group([
-      getClassShortInfo(classes[clsId]),
-      "در حال برگزاری است",
-    ].join(' '), true)
+  // ---------------------------------
 
-  for (const clsId of difference(newBeforeClassIds, lastBeforeClassIds))
+  let presentClassList = difference(newClassIds, lastClassIds).map(clsId =>
+    getClassShortInfo(classes[clsId]))
+
+  if (presentClassList.length)
     send2Group([
-      getClassShortInfo(classes[clsId]),
+      "در حال برگزاری است",
+      "\n",
+      ...presentClassList,
+    ].join("\n"), true)
+
+
+  let prepareClassList = difference(newBeforeClassIds, lastBeforeClassIds).map(clsId =>
+    getClassShortInfo(classes[clsId]))
+
+  if (prepareClassList.length)
+    send2Group([
       "دقایقی دیگر برگزار میشود",
-    ].join(' '), true)
+      "\n",
+      ...prepareClassList,
+    ].join('\n'), true)
+
+  // --------------------------------
 
   lastClassIds = newClassIds
   lastBeforeClassIds = newBeforeClassIds

@@ -1,12 +1,12 @@
 import { toPersianDate, persianWeekDays } from '../utils/time.js'
-import { bold, italic, markdownV2Escape } from '../utils/tg.js'
+import { bold, italic, underline, markdownV2Escape } from '../utils/tg.js'
 
 export function getClassShortInfo(cls) {
   return [
     "کلاس",
     italic(markdownV2Escape(cls["lesson"])),
     "با",
-    italic(markdownV2Escape(cls["teacher"]))
+    underline(markdownV2Escape(cls["teacher"]))
   ].join(' ')
 }
 
