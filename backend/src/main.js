@@ -182,7 +182,7 @@ bot.on("message", async (msg) => {
           ["/fal", "فال"],
           ["/hadis", "حدیث امروز"],
         ].map(arr => arr.join('  ')).join("\n"),
-      ].join(' '))
+      ].join(' '), true)
 
     else if (msg.text.startsWith('/classes')) {
       let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
