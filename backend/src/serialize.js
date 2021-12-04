@@ -20,16 +20,6 @@ function pairMarkup(arr) {
     arr[0]
 }
 
-export function getTraningInfo(tr, classesObject) {
-  let datetime = new Date(tr["datetime"])
-  return [
-    ["عنوان", tr["name"]],
-    ["تاریخ تحویل", getDateWithWeekDay(datetime)],
-    [getClassShortInfo(classesObject[tr["classId"]])],
-    ["توضیحات", tr["description"]],
-  ].map(pairMarkup).join('\n')
-}
-
 export function getEventInfo(tr, classesObject) {
   let datetime = new Date(tr["datetime"])
   return [
@@ -38,13 +28,4 @@ export function getEventInfo(tr, classesObject) {
     [getClassShortInfo(classesObject[tr["classId"]])],
     ["توضیحات", tr["description"]],
   ].map(pairMarkup).join('\n')
-}
-
-export const
-  border = "------------------",
-  escapedBorder = markdownV2Escape("------------------")
-
-export function applyBorder(text, escape = false) {
-  const myBorder = escape ? escapedBorder : border
-  return [myBorder, text, myBorder].join('\n')
 }

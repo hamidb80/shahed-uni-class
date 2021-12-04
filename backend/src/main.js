@@ -3,12 +3,11 @@ import cors from 'cors'
 import TelegramBot from 'node-telegram-bot-api'
 import path from 'path'
 
-import pickRandom from 'pick-random'
 import { difference } from "set-operations"
 import moment from 'moment'
 
 import { validateClass, validateEvent } from './types.js'
-import { getClassShortInfo, getTraningInfo, getEventInfo, border, applyBorder, escapedBorder } from './serialize.js'
+import { getClassShortInfo, getEventInfo } from './serialize.js'
 import { db, COLLECTIONS, runQuery, upsert, remove, removeMany } from './db.js'
 import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
 import { spliceArray, object2array } from '../utils/array.js'
@@ -111,7 +110,6 @@ app.post('/api/class', checkSecretKey(async (req, res) => {
   if (errors.length === 0)
     res.send(await upsert(COLLECTIONS.classes, req.body, undefined, () => {
       updateData()
-      send2Group("")
     }))
   else
     res.status(400).send(errors)
@@ -161,6 +159,10 @@ function send2Group(msg, markdown = false) {
   bot.sendMessage(GROUP_CHATID, msg, getMsgOption(markdown))
 }
 
+function getEventInfoWithNumber(tr, index) {
+  return `\\#${index + 1}\n${getEventInfo(tr, classes)}`
+}
+
 bot.on("message", async (msg) => {
   function send(text, markdown = false) {
     bot.sendMessage(msg.chat.id, text, getMsgOption(markdown))
@@ -174,26 +176,13 @@ bot.on("message", async (msg) => {
         bold("دستورات:"),
         "\n\n",
         [
-          ["/check", "بررسی وضعیت"],
           ["/classes", "کلاس های در حال برگزاری"],
           ["/trainings", "تمرین ها"],
           ["/events", "رویداد ها"],
           ["/fal", "فال"],
           ["/hadis", "حدیث امروز"],
         ].map(arr => arr.join('  ')).join("\n"),
-      ].join(' '), true)
-
-    else if (msg.text.startsWith('/check'))
-      send(pickRandom([
-        "جانم فدایتان اعلی حضرت",
-        "شما امر بفرما",
-        "حواسمو پرت نکن",
-        "عهههههه دارم کار میکنم",
-        "چییییههه؟",
-        "ساکت لطفا",
-        "...",
-        "هعی",
-      ])[0])
+      ].join(' '))
 
     else if (msg.text.startsWith('/classes')) {
       let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
@@ -203,7 +192,7 @@ bot.on("message", async (msg) => {
           currentClasses.length,
           "کلاس در حال برگزاری است",
         ].join(' '),
-        escapedBorder,
+        "\n",
         currentClasses.map(cls => [
           markdownV2Escape("\n >>  "), getClassShortInfo(cls)].join('')
         ).join("\n")
@@ -218,7 +207,7 @@ bot.on("message", async (msg) => {
         trArray.length,
         "تمرین موجود میباشد",
         "\n",
-        trArray.map(tr => applyBorder(getTraningInfo(tr, classes), true)).join("\n\n")
+        trArray.map(getEventInfoWithNumber).join("\n\n\n")
       ].join(" "), true)
     }
 
@@ -230,14 +219,14 @@ bot.on("message", async (msg) => {
         evArray.length,
         "رویداد وجود دارد",
         "\n",
-        evArray.map(ev => applyBorder(getEventInfo(ev, classes), true)).join("\n\n")
+        evArray.map(getEventInfoWithNumber).join("\n\n\n")
       ].join(" "), true)
     }
     else if (msg.text.startsWith('/fal')) {
-      send(['فال شما: \n ', await fal()].join('\n '), true)
+      send(['فال شما: \n', await fal()].join('\n'), true)
     }
     else if (msg.text.startsWith('/hadis')) {
-      send(['حدیث امروز :\n ', await HadithOfDay()].join('\n '), true)
+      send(['حدیث امروز :\n', await HadithOfDay()].join('\n'), true)
     }
   } catch (e) { }
 })
