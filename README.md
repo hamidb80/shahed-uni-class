@@ -7,3 +7,7 @@ tiny web service + telegram bot for our class in uni.
 
 [website](https://shahed-class-bot-hamidb.fandogh.cloud)
 [سایت](https://shahed-class-bot-hamidb.fandogh.cloud)
+
+## demo
+### web
+![main page](./demo/main-page.png)
