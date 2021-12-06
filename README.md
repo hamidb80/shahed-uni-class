@@ -11,3 +11,6 @@ tiny web service + telegram bot for our class in uni.
 ## demo
 ### web
 ![main page](./demo/main-page.png)
+
+### telegram bot
+![sample commands](./demo/sample-commands.png)
