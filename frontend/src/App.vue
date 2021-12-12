@@ -174,8 +174,8 @@ const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
       ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
-      : // ? "http://localhost:3000/api/"
-        "/api/",
+        // "http://localhost:3000/api/"
+      : "/api/",
   timeout: 60 * 1000,
 });
 
@@ -287,7 +287,7 @@ export default {
     async deleteEvent(trId) {
       this.loading = true;
       this.selectedTrainingId = "";
-      this.selectedEventId = ""
+      this.selectedEventId = "";
 
       await httpClient.delete(`/event/${trId}`, this.reqCfg);
       await this.update();

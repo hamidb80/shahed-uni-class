@@ -7,6 +7,7 @@ export const types = {
     "teacher": "string",
     "lesson": "string",
     "description": "string",
+    "notes": "string",
     "program[7]": "Day",
   },
 

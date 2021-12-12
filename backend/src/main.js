@@ -249,7 +249,7 @@ function currentClassIds(now) {
 }
 
 function resolveClassInfo(clsId, index) {
-  return `${index + 1} \\. ${getClassShortInfo(classes[clsId])}`
+  return `${index + 1} \\. ${getClassShortInfo(classes[clsId], true)}`
 }
 
 function task() {
@@ -292,5 +292,6 @@ function runScheduler() {
 app.listen(3000, async () => {
   console.log('running ...')
   await updateData()
+  console.log('got data')
   runScheduler()
 })

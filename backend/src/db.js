@@ -5,7 +5,8 @@ import { MONGODB_CONNECTION_URI } from './config.js'
 export const
   mongo = new MongoClient(MONGODB_CONNECTION_URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    // connectTimeoutMS: 20000
   }),
   db = mongo.db("shahed"),
 

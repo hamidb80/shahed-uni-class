@@ -23,6 +23,14 @@
       :disabled="!isAdmin"
     />
 
+    <textarea
+      type="text"
+      class="input"
+      v-model="notes"
+      placeholder="یادداشت ها"
+      :v-if="isAdmin"
+    />
+
     <div class="days">
       <div
         v-for="(day, di) in weekDays"
@@ -84,6 +92,7 @@ export default {
     teacher: "",
     lesson: "",
     description: "",
+    notes: "",
 
     program: [[], [], [], [], [], [], []],
 
@@ -111,6 +120,7 @@ export default {
         this.teacher = inputData["teacher"];
         this.lesson = inputData["lesson"];
         this.program = inputData["program"];
+        this.notes = inputData["notes"];
         this.description = inputData["description"];
         this.selectedDays = inputData["program"]
           .map((day, i) => (day.length !== 0 ? i : -1))
@@ -152,6 +162,7 @@ export default {
         lesson: this.lesson,
         program: this.program,
         description: this.description,
+        notes: this.notes,
       });
     },
 
