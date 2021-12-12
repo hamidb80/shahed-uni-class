@@ -8,7 +8,7 @@ export function getClassShortInfo(cls, addNotes = false) {
     "با",
     underline(markdownV2Escape(cls["teacher"])),
     (addNotes
-      ? ["\n", "نکات:", markdownV2Escape(cls["notes"])].join('')
+      ? "\n" + markdownV2Escape(cls["notes"])
       : ''
     ),
   ].join(' ')
