@@ -24,11 +24,11 @@
     />
 
     <textarea
+      v-if="isAdmin"
       type="text"
       class="input"
       v-model="notes"
       placeholder="یادداشت ها"
-      :v-if="isAdmin"
     />
 
     <div class="days">
