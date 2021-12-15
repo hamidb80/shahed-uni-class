@@ -29,6 +29,10 @@
           @delete="deleteEvent"
           @createOrUpadte="createOrUpadteEvent"
         />
+        <send-message-form
+          v-else-if="form === 'send-message'"
+          @send="sendMessage"
+        />
       </div>
     </div>
 
@@ -143,6 +147,9 @@
             <div class="btn" @click="changeForm('event')">
               <calendarI class="icon" />
             </div>
+            <div class="btn" @click="changeForm('send-message')">
+              <botI class="icon" />
+            </div>
           </div>
           <div v-else class="btn" @click="changeForm('login')">
             <loginI class="icon" />
@@ -165,17 +172,19 @@ import schoolI from "./icons/vue/school.vue";
 import closeI from "./icons/vue/close.vue";
 import bookI from "./icons/vue/book.vue";
 import calendarI from "./icons/vue/calendar.vue";
+import botI from "./icons/vue/bot.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
 import eventF from "./forms/event.vue";
+import sendMsgF from "./forms/send-msg.vue";
 
 const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
       ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
-        // "http://localhost:3000/api/"
-      : "/api/",
+      : // "http://localhost:3000/api/"
+        "/api/",
   timeout: 60 * 1000,
 });
 
@@ -187,12 +196,14 @@ export default {
     schoolI,
     closeI,
     bookI,
+    botI,
 
     calendarI,
 
     "class-form": classF,
     "login-form": loginF,
     "event-form": eventF,
+    "send-message-form": sendMsgF,
   },
 
   data: () => ({
@@ -231,6 +242,12 @@ export default {
   methods: {
     toPersianDate(dt) {
       return new Date(dt).toLocaleDateString("fa-IR");
+    },
+
+    async sendMessage(text) {
+      this.loading = true;
+      await httpClient.post(`/bot/`, { msg: text }, this.reqCfg);
+      this.loading = false;
     },
 
     clickOnItem(formName, itemId) {
