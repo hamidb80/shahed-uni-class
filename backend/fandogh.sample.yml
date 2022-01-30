@@ -3,6 +3,7 @@ name: shahed-class-bot
 spec:
   image: scb:0.1
   port: 3000
+  allow_http: no
 
   env:
   - name: MONGODBUSER

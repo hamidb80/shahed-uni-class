@@ -33,6 +33,11 @@
           v-else-if="form === 'send-message'"
           @send="sendMessage"
         />
+        <class-list-form
+          v-else-if="form === 'class-list'"
+          :classes="classes"
+          @redirect="handleClassRedirect"
+        />
       </div>
     </div>
 
@@ -76,7 +81,7 @@
       </div>
     </div>
 
-    <section>
+    <section class="tranings-wrapper">
       <header>
         <h2>تمرین ها</h2>
       </header>
@@ -100,7 +105,7 @@
       </table>
     </section>
 
-    <section>
+    <section class="events-wrapper">
       <header>
         <h2>رویداد ها</h2>
       </header>
@@ -138,6 +143,9 @@
 
         <div v-if="showMenu && !form">
           <div v-if="isVerifed">
+            <div class="btn" @click="changeForm('class-list')">
+              <uniI class="icon" />
+            </div>
             <div class="btn" @click="changeForm('class')">
               <schoolI class="icon" />
             </div>
@@ -173,11 +181,13 @@ import closeI from "./icons/vue/close.vue";
 import bookI from "./icons/vue/book.vue";
 import calendarI from "./icons/vue/calendar.vue";
 import botI from "./icons/vue/bot.vue";
+import uniI from "./icons/vue/university.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
 import eventF from "./forms/event.vue";
 import sendMsgF from "./forms/send-msg.vue";
+import classListF from "./forms/class-list.vue";
 
 const httpClient = axios.create({
   baseURL:
@@ -197,13 +207,14 @@ export default {
     closeI,
     bookI,
     botI,
-
+    uniI,
     calendarI,
 
     "class-form": classF,
     "login-form": loginF,
     "event-form": eventF,
     "send-message-form": sendMsgF,
+    "class-list-form": classListF,
   },
 
   data: () => ({
@@ -257,6 +268,10 @@ export default {
       if (formName === "class") this.selectedClassId = itemId;
       else if (formName === "training") this.selectedTrainingId = itemId;
       else if (formName === "event") this.selectedEventId = itemId;
+    },
+
+    handleClassRedirect(classId) {
+      this.clickOnItem("class", classId);
     },
 
     changeForm(formName) {
@@ -351,7 +366,7 @@ export default {
 @desktop-column-step: 36px;
 
 .app-header {
-  color: #424242;
+  color: @almostBlack;
   box-shadow: 0 4px 5px #00000030;
   z-index: 1;
   position: relative;
@@ -431,7 +446,7 @@ export default {
 
     &:nth-child(even) {
       .cell {
-        background-color: #f3f3f3;
+        background-color: @almostWhite;
       }
       .day {
         background-color: @c2;
@@ -530,7 +545,7 @@ section {
       }
 
       &:nth-child(even) {
-        background-color: #f3f3f3;
+        background-color: @almostWhite;
       }
 
       &:first-child {
