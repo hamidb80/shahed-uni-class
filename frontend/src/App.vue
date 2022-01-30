@@ -37,7 +37,7 @@
     </div>
 
     <header class="app-header">
-      <h1 class="title">مهندسی کامپیوتر دانشگاه شاهد 99</h1>
+      <h1 class="title">مهندسی کامپیوتر دانشگاه شاهد ۹۹</h1>
     </header>
 
     <div class="table program">
@@ -434,7 +434,7 @@ export default {
         background-color: #f3f3f3;
       }
       .day {
-        background-color: #ff5555;
+        background-color: @c2;
       }
     }
 
@@ -443,7 +443,7 @@ export default {
         background-color: white;
       }
       .day {
-        background-color: #ff6b00;
+        background-color: @c1;
       }
     }
 
@@ -453,7 +453,7 @@ export default {
       .cell {
         color: white;
         font-weight: bold;
-        background-color: #212121;
+        background-color: @c3;
 
         border-top-color: #565656;
         border-bottom-color: #565656;
@@ -534,7 +534,7 @@ section {
       }
 
       &:first-child {
-        background-color: #212121;
+        background-color: @c3;
         color: white;
       }
       &:hover {
