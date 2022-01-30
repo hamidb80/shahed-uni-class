@@ -587,7 +587,7 @@ section {
       cursor: pointer;
       align-items: center;
       margin: 12px;
-      background: #212121;
+      background: @almostBlack;
       .circle(48px);
 
       .icon {
