@@ -439,7 +439,7 @@ export default {
         }
 
         &:hover {
-          background-color: #ffecc8;
+          background-color: #C8F6ED;
         }
       }
     }
@@ -555,7 +555,7 @@ section {
       &:hover {
         cursor: pointer;
         td {
-          background-color: #ffecc8;
+          background-color: @highlight;
         }
       }
     }
@@ -591,7 +591,7 @@ section {
       .circle(48px);
 
       .icon {
-        .square(70%);
+        .square(60%);
         fill: white;
       }
     }

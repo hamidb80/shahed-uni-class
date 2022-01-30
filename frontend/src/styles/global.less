@@ -1,3 +1,14 @@
+@mobile-width: 500px;
+
+@c1: #3EC8AC;
+@c2: #4E90A4;
+@c3: #6E60A0;
+@highlight: #C8F6ED;
+@almostWhite: #f3f3f3;
+@almostBlack: #424242;
+
+// ---------------------
+
 * {
   padding: 0;
   margin: 0;
@@ -27,28 +38,28 @@ body {
 
 
 ::-webkit-scrollbar-track {
-  background-color: #F5F5F5;
+  background-color: @almostWhite;
 }
 
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
-  background-color: #F5F5F5;
+  background-color: @almostWhite;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #212121;
+  background-color: @almostBlack;
 }
 
 ::-moz-selection {
   /* Code for Firefox */
-  color: #424242;
-  background: #83E4B5;
+  color: @almostBlack;
+  background: @highlight;
 }
 
 ::selection {
-  color: #424242;
-  background: #83E4B5;
+  color: @almostBlack;
+  background: @highlight;
 }
 
 
@@ -62,10 +73,6 @@ body {
   .square(@s);
   border-radius: 50%;
 }
-
-
-// ---------------
-
 
 .px(@s) {
   padding-left: @s;
@@ -97,13 +104,3 @@ body {
   display: flex;
   align-items: center;
 }
-
-// ------------------------
-
-@mobile-width: 500px;
-
-@c1: #3EC8AC;
-@c2: #4E90A4;
-@c3: #6E60A0;
-@almostWhite: #f3f3f3;
-@almostBlack: #424242;
