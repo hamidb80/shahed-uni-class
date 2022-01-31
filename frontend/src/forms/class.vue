@@ -198,7 +198,7 @@ export default {
 
       &.active {
         color: white;
-        background-color: tomato;
+        background-color: @c1;
       }
     }
   }
@@ -238,7 +238,7 @@ export default {
 
           &.active {
             color: white;
-            background-color: tomato;
+            background-color: @c1;
           }
         }
       }

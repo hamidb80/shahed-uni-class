@@ -66,11 +66,22 @@ export default {
         .square(20px);
         fill: @almostBlack;
       }
+    }
 
-      &:hover {
-        background-color: @almostBlack;
+    &:hover {
+      background: @highlight;
+      .class-action {
+        border-color: @c3;
         .icon {
-          fill: @almostWhite;
+          fill: @c3;
+        }
+
+        &:hover {
+          background: @c3;
+
+          .icon {
+            fill: @almostWhite;
+          }
         }
       }
     }
