@@ -258,7 +258,7 @@ export default {
       }
 
       &:hover {
-        background-color: tomato;
+        background-color: @c1;
         color: white;
         cursor: pointer;
       }
