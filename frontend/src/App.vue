@@ -221,8 +221,7 @@ export default {
     weekDays,
     classTimes,
 
-    // isVerifed: false,
-    isVerifed: true,
+    isVerifed: false,
     showMenu: false,
     form: "",
     secretKey: "",
