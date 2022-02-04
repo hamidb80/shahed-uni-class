@@ -23,6 +23,7 @@ export function objecFilter(object, fn) {
 }
 
 export function extractKeys(object, keys) {
+  
   return keys.map(k => object[k])
 }
 

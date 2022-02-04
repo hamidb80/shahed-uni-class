@@ -2,7 +2,9 @@ import { validateStructure, buildError } from 'validate-structure'
 import moment from 'moment'
 
 export const types = {
-  Day: "number[]",
+  TimeRange: "number[2]", // in minutes. eg: [60, 140] => 01:00 until 02:20
+  Day: "TimeRange[]",
+  
   Class: {
     "teacher": "string",
     "lesson": "string",
@@ -14,7 +16,7 @@ export const types = {
   Event: {
     "name": "string",
     "type": "string",
-    "classId?": "string",
+    "classId": "string",
     "description": "string",
     "datetime": DateTimeValiator, // time
   },

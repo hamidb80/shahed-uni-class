@@ -6,4 +6,6 @@ let data = YAML.parse(readFileSync("./fandogh.yml", "utf-8"))
 for (let evar of data['spec']['env'])
   process.env[evar["name"]] = evar["value"]
 
+process.env["DBPATH"] = "./play.json"
+
 import("./main.js")

@@ -2,20 +2,22 @@ import express from 'express'
 import cors from 'cors'
 import TelegramBot from 'node-telegram-bot-api'
 import path from 'path'
+import { v4 as uuid } from 'uuid'
 
 import { difference } from "set-operations"
 import moment from 'moment'
 
 import { validateClass, validateEvent } from './types.js'
 import { getClassShortInfo, getEventInfo } from './serialize.js'
-import { db, COLLECTIONS, runQuery, upsert, remove, removeMany } from './db.js'
+import { initDB, readDB, saveDB } from './db.js'
 import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
-import { spliceArray, object2array } from '../utils/array.js'
-import { getClassTimeIndex, getCurrentWeekTimeInfo, classTimes } from '../utils/time.js'
+import { object2array } from '../utils/array.js'
+import { getCurrentWeekTimeInfo } from '../utils/time.js'
 import { bold, markdownV2Escape } from '../utils/tg.js'
 
 import { TG_TOKEN, SECRET_KEY, GROUP_CHATID } from './config.js'
 import { fal, HadithOfDay } from "./dataCollector.js"
+import { isBetween } from '../utils/math.js'
 const __dirname = path.resolve()
 // init services --------------------------
 
@@ -30,49 +32,35 @@ const
 // app data ------------------------------------
 
 let
-  classes = {}, // class_id => class
-  trainings = [], // 
-  events = [],
-  program = [] // array of day | day is array of time | time is array of class_ids
+  classesMap = {}, // class_id => class
+  remindersMap = {}
 
-function resetProgram() {
-  program = []
-  for (let di = 0; di < 7; di++) { // day index
-    program[di] = []
+let reminderSort = (a, b) => a.datetime < b.datetime ? -1 : +1
 
-    for (let ti = 0; ti < 7; ti++) // time index
-      program[di][ti] = []
-  }
+function getEvents() {
+  return object2array(objecFilter(remindersMap, (_, ev) => ev.type === "event"))
+    .sort(reminderSort)
 }
-
-function processData(classesArray, eventArray) {
-  resetProgram()
-  for (let di = 0; di < 7; di++) { // day index
-    for (let ti = 0; ti < 7; ti++) { // time index
-      program[di][ti] =
-        classesArray
-          .filter(cls => cls.program[di].includes(ti))
-          .map(cls => cls["_id"])
-    }
-  }
-  eventArray.sort((a, b) => a.datetime < b.datetime ? -1 : +1)
-
-  classes = arr2object(classesArray, cls => cls["_id"])
-
-  trainings = arr2object(spliceArray(eventArray, ev => ev.type === "training"), tr => tr["_id"])
-  events = arr2object(eventArray, ev => ev["_id"])
+function getTrainings() {
+  return object2array(objecFilter(remindersMap, (_, ev) => ev.type === "training"))
+    .sort(reminderSort)
 }
 
 // ------------------- database 
 
-async function updateData() {
-  processData(
-    await runQuery(
-      async () => await db.collection(COLLECTIONS.classes).find().toArray()),
+function appendId(obj) {
+  let id = uuid()
+  obj["_id"] = id
+  return id
+}
 
-    await runQuery(
-      async () => await db.collection(COLLECTIONS.events).find().toArray())
-  )
+async function syncDB(firstTime = false) {
+  if (!firstTime)
+    await saveDB(classesMap, remindersMap)
+
+  let data = await readDB()
+  classesMap = data.classes
+  remindersMap = data.reminders
 }
 
 // web service --------------------------------------
@@ -89,64 +77,87 @@ function checkSecretKey(next) {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', '/page.html'))
 })
-
 app.get('/api/now', (req, res) => {
   res.send(moment().format())
 })
 app.get('/api/getAll', async (req, res) => {
-  res.send({ classes, program, trainings, events })
+  res.send({ classes: classesMap, trainings: getTrainings(), events: getEvents() })
 })
-
 app.post('/api/verify', (req, res) => {
   res.send({ result: req.body.secretKey === SECRET_KEY })
 })
-app.post('/api/update', checkSecretKey(async (req, res) => {
-  await updateData()
-  res.send({ result: "ok" })
-}))
 
 app.post('/api/class', checkSecretKey(async (req, res) => {
-  let errors = validateClass(req.body)
-  if (errors.length === 0)
-    res.send(await upsert(COLLECTIONS.classes, req.body, undefined, () => {
-      updateData()
-    }))
+  let
+    newClass = req.body,
+    errors = validateClass(newClass)
+
+  if (errors.length === 0) {
+    classesMap[id] = appendId(newClass)
+    await syncDB()
+    res.send(newClass)
+  }
   else
     res.status(400).send(errors)
 }))
 app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
-  let errors = validateClass(req.body)
-  if (errors.length === 0)
-    res.send(await upsert(COLLECTIONS.classes, req.body, req.params.cid, updateData))
+  let
+    edittedClass = req.body,
+    cid = req.params.cid,
+    errors = validateClass(edittedClass)
+
+  if (errors.length === 0 && cid in classesMap) {
+    classesMap[cid] = edittedClass
+    await syncDB()
+    res.status(200).send()
+  }
   else
     res.status(400).send(errors)
 }))
 app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
-  await removeMany(COLLECTIONS.events, { "classId": req.params.cid })
-  res.send(await remove(COLLECTIONS.classes, req.params.cid, updateData))
+  let cid = req.params.cid
+  remindersMap = objecFilter(remindersMap, (_, ev) => ev["classId"] != cid)
+  classesMap[cid] = undefined
+  await syncDB()
+  res.status(200).send()
 }))
 
-app.post('/api/event', checkSecretKey(async (req, res) => {
-  let errors = validateEvent(req.body)
-  if (errors.length === 0)
-    res.send(await upsert(COLLECTIONS.events, req.body, undefined, updateData))
+app.post('/api/reminder', checkSecretKey(async (req, res) => {
+  let
+    newEvent = req.body,
+    errors = validateEvent(newEvent)
+
+  if (errors.length === 0) {
+    appendId(newEvent)
+    remindersMap[newEvent._id] = newEvent
+    await syncDB()
+    res.send(newEvent)
+  } else
+    res.status(400).send(errors)
+}))
+app.put('/api/reminder/:evid', checkSecretKey(async (req, res) => {
+  let
+    edittedEvent = req.body,
+    errors = validateEvent(),
+    evid = req.params.evid
+
+  if (errors.length === 0) {
+    remindersMap[evid] = edittedEvent
+    await syncDB()
+    res.status(200).send()
+  }
   else
     res.status(400).send(errors)
 }))
-app.put('/api/event/:evid', checkSecretKey(async (req, res) => {
-  let errors = validateEvent(req.body)
-  if (errors.length === 0)
-    res.send(await upsert(COLLECTIONS.events, req.body, req.params.evid, updateData))
-  else
-    res.status(400).send(errors)
-}))
-app.delete('/api/event/:evid', checkSecretKey(async (req, res) => {
-  res.send(await remove(COLLECTIONS.events, req.params.evid, updateData))
+app.delete('/api/reminder/:evid', checkSecretKey(async (req, res) => {
+  remindersMap[req.params.evid] = undefined
+  await syncDB()
+  res.status(200).send()
 }))
 
 // telegram bot -------------------------
 
-app.post('/api/bot/', checkSecretKey((req, res) => {
+app.post('/api/bot/sendText', checkSecretKey((req, res) => {
   send2Group(req.body.msg)
   res.send(req.body)
 }))
@@ -160,7 +171,7 @@ function send2Group(msg, markdown = false) {
 }
 
 function getEventInfoWithNumber(tr, index) {
-  return `\\#${index + 1}\n${getEventInfo(tr, classes)}`
+  return `\\#${index + 1}\n${getEventInfo(tr, classesMap)}`
 }
 
 bot.on("message", async (msg) => {
@@ -170,8 +181,7 @@ bot.on("message", async (msg) => {
 
   if (!msg.text) return
   try {
-
-    if (msg.text.startsWith('/start'))
+    if (msg.text.startsWith('/start')) {
       send([
         bold("دستورات:"),
         "\n\n",
@@ -183,9 +193,9 @@ bot.on("message", async (msg) => {
           ["/hadis", "حدیث امروز"],
         ].map(arr => arr.join('  ')).join("\n"),
       ].join(' '), true)
-
+    }
     else if (msg.text.startsWith('/classes')) {
-      let currentClasses = currentClassIds(getCurrentWeekTimeInfo()).map(cid => classes[cid])
+      let currentClasses = getCurrentClassIds(getCurrentWeekTimeInfo()).map(cid => classesMap[cid])
       send([
         [
           "هم اکنون",
@@ -198,9 +208,8 @@ bot.on("message", async (msg) => {
         ).join("\n")
       ].join('\n'), true)
     }
-
     else if (msg.text.startsWith('/trainings')) {
-      let trArray = object2array(trainings)
+      let trArray = getTrainings()
 
       send([
         "تعداد",
@@ -210,9 +219,8 @@ bot.on("message", async (msg) => {
         trArray.map(getEventInfoWithNumber).join("\n\n\n")
       ].join(" "), true)
     }
-
     else if (msg.text.startsWith('/events')) {
-      let evArray = object2array(events)
+      let evArray = getEvents()
 
       send([
         "تعداد",
@@ -237,29 +245,27 @@ let
   lastClassIds = [],
   lastBeforeClassIds = []
 
-function currentClassIds(now) {
-  let classTimeIndex = getClassTimeIndex(now.mtime, classTimes)
-
+function getCurrentClassIds(now) {
   return objectMap2Array(
     objecFilter(
-      classes,
-      (_, cls) => cls.program[now.dayIndex].includes(classTimeIndex)
+      classesMap,
+      (_, cls) => cls.program[now.dayIndex].some(timeRange => isBetween(now.mtime, ...timeRange))
     ),
     (id, _) => id)
 }
 
 function resolveClassInfo(clsId, index) {
-  return `${index + 1} \\. ${getClassShortInfo(classes[clsId], true)}`
+  return `${index + 1} \\. ${getClassShortInfo(classesMap[clsId], true)}`
 }
 
 function task() {
   let
-    newClassIds = currentClassIds(getCurrentWeekTimeInfo()),
-    newBeforeClassIds = currentClassIds(getCurrentWeekTimeInfo(moment.duration(15, "minutes")))
+    currentClassIds = getCurrentClassIds(getCurrentWeekTimeInfo()),
+    currentBeforeClassIds = getCurrentClassIds(getCurrentWeekTimeInfo(moment.duration(15, "minutes")))
 
   // ---------------------------------
 
-  let prepareClassList = difference(newBeforeClassIds, lastBeforeClassIds, true).map(resolveClassInfo)
+  let prepareClassList = difference(currentBeforeClassIds, lastBeforeClassIds, true).map(resolveClassInfo)
   if (prepareClassList.length)
     send2Group([
       "دقایقی دیگر برگزار میشود",
@@ -268,7 +274,7 @@ function task() {
     ].join('\n'), true)
 
 
-  let presentClassList = difference(newClassIds, lastClassIds, true).map(resolveClassInfo)
+  let presentClassList = difference(currentClassIds, lastClassIds, true).map(resolveClassInfo)
   if (presentClassList.length)
     send2Group([
       "در حال برگزاری است",
@@ -278,20 +284,21 @@ function task() {
 
   // --------------------------------
 
-  lastClassIds = newClassIds
-  lastBeforeClassIds = newBeforeClassIds
+  lastClassIds = currentClassIds
+  lastBeforeClassIds = currentBeforeClassIds
 }
 
 // ----------------------------
 
 function runScheduler() {
-  task()
-  return setInterval(task, 60 * 1000)
+  // task()
+  // return setInterval(task, 60 * 1000)
 }
 
 app.listen(3000, async () => {
   console.log('running ...')
-  await updateData()
+  await initDB()
+  await syncDB(true)
   console.log('got data')
   runScheduler()
 })
