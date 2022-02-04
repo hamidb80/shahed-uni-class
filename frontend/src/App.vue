@@ -63,21 +63,27 @@
         </div>
 
         <div class="time cell" v-for="(time, ti) in times" :key="ti"></div>
-
         <div
-          class="class"
-          v-for="clsItem in program[di]"
-          :key="clsItem.classId"
-          :style="{
-            tranform: `translateY(${calcOffset(clsItem)})`,
-            height: `${calcLen(clsItem)}px`,
-            backgroundColor: clsItem.color,
-            marginTop: `-${times.length * timeCellHeight}px`,
-          }"
-          @click="clickOnItem('class', clsItem.classId)"
+          class="classes"
+          :style="{ marginTop: `-${times.length * timeCellHeight}px` }"
         >
-          <div class="lesson">
-            {{ classes[clsItem.classId].lesson }}
+          <div
+            class="class"
+            v-for="(clsItem, ci) in program[di]"
+            :key="clsItem.classId"
+            :style="{
+              transform: `translate(
+                ${(ci % 4) * classItemWidth}px,  
+                ${-clsItem.heightOffset + calcOffset(clsItem)}px
+              )`,
+              height: `${calcLen(clsItem)}px`,
+              backgroundColor: clsItem.color,
+            }"
+            @click="clickOnItem('class', clsItem.classId)"
+          >
+            <div class="lesson">
+              {{ classes[clsItem.classId].lesson }}
+            </div>
           </div>
         </div>
       </div>
@@ -231,6 +237,7 @@ export default {
     weekDays,
     times,
     timeCellHeight: 32,
+    classItemWidth: 50,
 
     isVerifed: false,
     showMenu: false,
@@ -263,7 +270,9 @@ export default {
     },
 
     calcOffset(clsItem) {
-      return (clsItem.start - this.times[0]) * this.timeCellHeight;
+      return (
+        ((clsItem.start - this.times[0]) / timeSpace) * this.timeCellHeight
+      );
     },
 
     calcLen(clsItem) {
@@ -411,21 +420,24 @@ export default {
     white-space: normal;
     width: 200px;
 
-    .class {
-      width: 40px;
-      cursor: pointer;
-      border-radius: 4px;
-      .px(6px);
-      .py(2px);
-      .mx(5px);
+    .classes {
+      .class {
+        width: 40px;
+        cursor: pointer;
+        border-radius: 4px;
+        .px(6px);
+        .py(2px);
+        .mx(5px);
+        // display: inline-block;
 
-      overflow: hidden;
+        overflow: hidden;
 
-      .lesson {
-        .fa();
-        color: white;
-        width: 200px;
-        transform: translate(-86px, 93px) rotate(-90deg);
+        .lesson {
+          .fa();
+          color: white;
+          width: 200px;
+          transform: translate(-86px, 93px) rotate(-90deg);
+        }
       }
     }
 

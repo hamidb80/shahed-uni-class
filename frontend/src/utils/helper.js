@@ -57,11 +57,19 @@ export function genProgram(classesMap) {
         result[dayIndex].push({
           classId, color,
           start: timeRange[0],
-          end: timeRange[1]
+          end: timeRange[1],
+          heightOffset: 0,
         })
       }
     }
   }
 
+  for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+    let heightAcc = 0
+    for (let clsItem of result[dayIndex]) {
+      clsItem.heightOffset = heightAcc
+      heightAcc += clsItem.end - clsItem.start
+    }
+  }
   return result
 }
