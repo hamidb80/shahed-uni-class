@@ -53,7 +53,7 @@
           {{ weekDays[di] }}
         </div>
         <div class="times">
-          <div
+          <!-- <div
             v-for="(time, ti) in classTimes"
             :key="ti"
             @click="toggleTime(di, ti)"
@@ -65,7 +65,7 @@
             ]"
           >
             {{ time }}
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -78,7 +78,7 @@
 </template>
 
 <script>
-import { classTimes, weekDays } from "../utils/meta.js";
+import { weekDays } from "../utils/helper.js";
 
 export default {
   props: {
@@ -100,7 +100,6 @@ export default {
     fromExisting: false,
     selectedDays: [],
 
-    classTimes,
     weekDays,
   }),
 

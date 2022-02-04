@@ -48,35 +48,37 @@
     <div class="table program">
       <div class="column times">
         <div class="corner cell"></div>
-        <div class="time cell" v-for="time in classTimes" :key="time">
+        <div class="time cell" v-for="t in times" :key="t">
           <span class="text">
-            {{ time }}
+            {{ toPersianTime(t) }}
           </span>
         </div>
       </div>
 
-      <div
-        :class="['column', `max-classes-${maxDaysClasses[di]}`]"
-        v-for="(day, di) in program"
-        :key="di"
-      >
+      <div class="column" v-for="(day, di) in program" :key="di">
         <div class="day cell">
           <span class="text">
             {{ weekDays[di] }}
           </span>
         </div>
-        <div class="time cell" v-for="(time, ti) in day" :key="ti">
-          <template v-if="time.length">
-            <div
-              class="class"
-              v-for="clsId in time"
-              :key="clsId"
-              @click="clickOnItem('class', clsId)"
-            >
-              {{ classes[clsId].lesson }}
-            </div>
-          </template>
-          <div v-else class="class empty"></div>
+
+        <div class="time cell" v-for="(time, ti) in times" :key="ti"></div>
+
+        <div
+          class="class"
+          v-for="clsItem in program[di]"
+          :key="clsItem.classId"
+          :style="{
+            tranform: `translateY(${calcOffset(clsItem)})`,
+            height: `${calcLen(clsItem)}px`,
+            backgroundColor: clsItem.color,
+            marginTop: `-${times.length * timeCellHeight}px`,
+          }"
+          @click="clickOnItem('class', clsItem.classId)"
+        >
+          <div class="lesson">
+            {{ classes[clsItem.classId].lesson }}
+          </div>
         </div>
       </div>
     </div>
@@ -171,7 +173,15 @@
 </template>
 
 <script>
-import { weekDays, classTimes } from "./utils/meta.js";
+import {
+  weekDays,
+  times,
+  minutes2TimeArray,
+  genProgram,
+  timeSpace,
+} from "./utils/helper.js";
+import { convertEnToPe } from "persian-number";
+
 import axios from "axios";
 
 import loginI from "./icons/vue/login.vue";
@@ -192,9 +202,9 @@ import classListF from "./forms/class-list.vue";
 const httpClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
-      ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
-      : // "http://localhost:3000/api/"
-        "/api/",
+      ? // ? "http://shahed-class-bot-hamidb.fandogh.cloud/api/"
+        "http://localhost:3000/api/"
+      : "/api/",
   timeout: 60 * 1000,
 });
 
@@ -219,7 +229,8 @@ export default {
 
   data: () => ({
     weekDays,
-    classTimes,
+    times,
+    timeCellHeight: 32,
 
     isVerifed: false,
     showMenu: false,
@@ -231,33 +242,41 @@ export default {
     selectedEventId: "",
 
     classes: {}, // classId => class{teacher, lesson, program}
-    program: [],
     trainings: {},
     events: {},
 
-    maxDaysClasses: [], // array of int
+    program: [[], [], [], [], [], [], []],
 
     loading: false,
   }),
 
   computed: {
     reqCfg() {
-      return {
-        headers: {
-          "secret-key": this.secretKey,
-        },
-      };
+      return { headers: { "secret-key": this.secretKey } };
     },
   },
 
   methods: {
+    toPersianTime(minutes) {
+      let ta = minutes2TimeArray(minutes);
+      return convertEnToPe(`${ta[0]}:${ta[1]}`);
+    },
+
+    calcOffset(clsItem) {
+      return (clsItem.start - this.times[0]) * this.timeCellHeight;
+    },
+
+    calcLen(clsItem) {
+      return ((clsItem.end - clsItem.start) / timeSpace) * this.timeCellHeight;
+    },
+
     toPersianDate(dt) {
       return new Date(dt).toLocaleDateString("fa-IR");
     },
 
     async sendMessage(text) {
       this.loading = true;
-      await httpClient.post(`/bot/`, { msg: text }, this.reqCfg);
+      await httpClient.post(`/bot/sendText`, { msg: text }, this.reqCfg);
       this.loading = false;
     },
 
@@ -331,13 +350,10 @@ export default {
       let res = await httpClient.get("/getAll");
 
       this.classes = res.data.classes;
-      this.program = res.data.program;
       this.trainings = res.data.trainings;
       this.events = res.data.events;
 
-      this.maxDaysClasses = this.program.map((dayProgram) =>
-        Math.max(...dayProgram.map((time) => time.length))
-      );
+      this.program = genProgram(this.classes);
 
       this.loading = false;
     },
@@ -379,6 +395,8 @@ export default {
     .fa();
   }
 }
+@dayCellHeight: 56px;
+@timeCellHeight: 32px;
 
 .table.program {
   display: flex;
@@ -391,16 +409,34 @@ export default {
     flex-shrink: 0;
     flex-direction: column;
     white-space: normal;
+    width: 200px;
+
+    .class {
+      width: 40px;
+      cursor: pointer;
+      border-radius: 4px;
+      .px(6px);
+      .py(2px);
+      .mx(5px);
+
+      overflow: hidden;
+
+      .lesson {
+        .fa();
+        color: white;
+        width: 200px;
+        transform: translate(-86px, 93px) rotate(-90deg);
+      }
+    }
 
     .cell {
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 0.5px solid #aaa;
+      border: 0.5px solid #d1d1d1;
       width: 100%;
-      height: 80px;
+      height: @timeCellHeight;
 
-      .class,
       .text {
         .fa();
         text-align: center;
@@ -408,10 +444,10 @@ export default {
 
       &.day,
       &.corner {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         font-weight: bold;
-        height: 60px;
         color: white;
+        height: @dayCellHeight;
       }
       &.day {
         border-right-color: white;
@@ -439,7 +475,7 @@ export default {
         }
 
         &:hover {
-          background-color: #C8F6ED;
+          background-color: #c8f6ed;
         }
       }
     }
@@ -473,42 +509,23 @@ export default {
         border-top-color: #565656;
         border-bottom-color: #565656;
         direction: ltr;
+        border-top: 2px solid lighten(@c3, 40%);
       }
       .text {
         direction: ltr;
+        transform: translateY(-16px);
+        display: inline-block;
+        background-color: darken(@c3, 8%);
+        .px(8px);
+        .py(1px);
+        border-radius: 12px;
       }
       .corner {
         background-color: transparent;
       }
     }
 
-    &.max-classes-0 {
-      width: @desktop-column-width;
-    }
-    &.max-classes-1 {
-      width: @desktop-column-width + @desktop-column-step;
-    }
-    &.max-classes-2 {
-      width: @desktop-column-width + 2 * @desktop-column-step;
-    }
-    &.max-classes-3 {
-      width: @desktop-column-width + 3 * @desktop-column-step;
-    }
-
     @media screen and (max-width: @mobile-width) {
-      &.max-classes-0 {
-        width: @mobile-column-width + @mobile-column-step;
-      }
-      &.max-classes-1 {
-        width: @mobile-column-width + @mobile-column-step;
-      }
-      &.max-classes-2 {
-        width: @mobile-column-width + 2 * @mobile-column-step;
-      }
-      &.max-classes-3 {
-        width: @mobile-column-width + 3 * @mobile-column-step;
-      }
-
       .cell {
         height: 56px;
 

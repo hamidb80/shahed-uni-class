@@ -1,11 +1,11 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add jalali-js
+  C:\Program Files\nodejs\node.exe C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add randint
 
 PATH: 
-  C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Python\Python39\Scripts\;C:\Python\Python39\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\CMake\bin;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Users\HamidB80\AppData\Local\Microsoft\WindowsApps;C:\Users\HamidB80\AppData\Roaming\npm;C:\Users\HamidB80\.nimble\bin;C:\Program Files\Inkscape\bin;C:\mingw64\include\boost_1_68_build\bin;C:\Users\HamidB80\AppData\Local\Programs\Microsoft VS Code\bin;C:\vcpkg;C:\CMake;C:\mingw64\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx64\x64;C:\Python\Python39\Scripts;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;C:\nim-1.4.8\bin;C:\Program Files (x86)\Java\jre1.8.0_291\bin;C:\lua;C:\dll;C:\nim-1.4.8\dist\mingw64\bin;C:\Users\HamidB80\AppData\Local\Microsoft\WindowsApps;C:\Users\HamidB80\cockroach\cockroach-v21.1.7.windows-6.2-amd64;C:\Users\HamidB80\AppData\Local\Yarn\bin;C:\Users\HamidB80\apps;
+  C:\ImageMagick;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Python\Python39\Scripts\;C:\Python\Python39\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\CMake\bin;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\erl10.7\bin;C:\Program Files (x86)\Elixir\bin;C:\WINDOWS\system32\config\systemprofile\.mix\escripts;C:\Users\HamidB80\AppData\Local\Microsoft\WindowsApps;C:\Users\HamidB80\AppData\Roaming\npm;C:\Users\HamidB80\.nimble\bin;C:\Program Files\Inkscape\bin;C:\mingw64\include\boost_1_68_build\bin;C:\Users\HamidB80\AppData\Local\Programs\Microsoft VS Code\bin;C:\vcpkg;C:\CMake;C:\mingw64\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx64\x64;C:\Python\Python39\Scripts;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;C:\nim-1.6.0\bin;C:\Program Files (x86)\Java\jre1.8.0_291\bin;C:\lua;C:\dll;C:\Users\HamidB80\AppData\Local\Microsoft\WindowsApps;C:\Users\HamidB80\cockroach\cockroach-v21.1.7.windows-6.2-amd64;C:\Users\HamidB80\AppData\Local\Yarn\bin;C:\Users\HamidB80\apps;C:\nim-1.6.0\bin;C:\Users\HamidB80\.nimble\bin;C:\nim-1.6.0\dist\mingw64\bin;
 
 Yarn version: 
-  1.22.11
+  1.22.17
 
 Node version: 
   14.16.0
@@ -14,13 +14,13 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/jalali-js: Not found
-      at Request.params.callback [as _callback] (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:66992:18)
-      at Request.self.callback (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140763:22)
+  Error: https://registry.yarnpkg.com/randint: Not found
+      at Request.params.callback [as _callback] (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:67029:18)
+      at Request.self.callback (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140883:22)
       at Request.emit (events.js:315:20)
-      at Request.<anonymous> (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141735:10)
+      at Request.<anonymous> (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141855:10)
       at Request.emit (events.js:315:20)
-      at IncomingMessage.<anonymous> (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141657:12)
+      at IncomingMessage.<anonymous> (C:\Users\HamidB80\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141777:12)
       at Object.onceWrapper (events.js:421:28)
       at IncomingMessage.emit (events.js:327:22)
       at endReadableNT (internal/streams/readable.js:1327:12)
@@ -39,8 +39,10 @@ npm manifest:
     "dependencies": {
       "axios": "^0.21.4",
       "jalaali-js": "^1.2.3",
+      "persian-number": "^1.5.1",
       "vue": "^3.0.0",
-      "vue-awesome-datepicker": "^1.1.1"
+      "vue3-persian-datepicker": "^0.1.9",
+      "vue3-persian-datetime-picker": "^1.1.0"
     },
     "devDependencies": {
       "@vue/cli-plugin-eslint": "~4.5.0",
@@ -4039,7 +4041,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
     integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
   
-  jalaali-js@^1.2.3:
+  jalaali-js@^1.1.0, jalaali-js@^1.2.3:
     version "1.2.3"
     resolved "https://registry.yarnpkg.com/jalaali-js/-/jalaali-js-1.2.3.tgz#365775826d2eece5e6552b96aff384c8773bb406"
     integrity sha512-irl0pXL59Xl0Oz6jyOiJed/NxrVeS6fSx6a8atQOH/LsPWPZwBCxwe5XVEIqjnwt69FRxvnCCwQn5dTMxwbazQ==
@@ -4592,6 +4594,28 @@ Lockfile:
     integrity sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
     dependencies:
       minimist "^1.2.5"
+  
+  moment-jalaali@^0.9.2:
+    version "0.9.2"
+    resolved "https://registry.yarnpkg.com/moment-jalaali/-/moment-jalaali-0.9.2.tgz#1c67917aa13003db19c070ea4118945fcb626250"
+    integrity sha512-Z7dgu6NFnq9MhbAtwj0x7tHFXm+rzSu5Ju7Fc3RloqFQ/3zSJh8kuzxNdAp7cgMF/s/ydob+fAEJvQds/hz25g==
+    dependencies:
+      jalaali-js "^1.1.0"
+      moment "^2.22.2"
+      moment-timezone "^0.5.21"
+      rimraf "^2.6.2"
+  
+  moment-timezone@^0.5.21:
+    version "0.5.33"
+    resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.33.tgz#b252fd6bb57f341c9b59a5ab61a8e51a73bbd22c"
+    integrity sha512-PTc2vcT8K9J5/9rDEPe5czSIKgLoGsH8UNpA4qZTVw0Vd/Uz19geE9abbIOQKaAQFcnQ3v5YEXrbSc5BpshH+w==
+    dependencies:
+      moment ">= 2.9.0"
+  
+  "moment@>= 2.9.0", moment@^2.22.2:
+    version "2.29.1"
+    resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
+    integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
   
   move-concurrently@^1.0.1:
     version "1.0.1"
@@ -5237,6 +5261,16 @@ Lockfile:
     version "2.1.0"
     resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
     integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
+  
+  persian-date@^1.1.0:
+    version "1.1.0"
+    resolved "https://registry.yarnpkg.com/persian-date/-/persian-date-1.1.0.tgz#a06155797bca20217fa8302101ea5efd041a3221"
+    integrity sha512-YwV3703jLTTJFFQfP3RvMfvKZc5Z1yE++Deywox+hkVLuVN81VsTaZFma9k5P9SgfSUvXjiylbQVuf4YYLGOow==
+  
+  persian-number@^1.5.1:
+    version "1.5.1"
+    resolved "https://registry.yarnpkg.com/persian-number/-/persian-number-1.5.1.tgz#7c897e8ab8f72ba2eba4daf8d8be19b8aec5fab6"
+    integrity sha512-BbJ0vUV23RtFCYiEn6jTx3hzDHRD8pAWl7xrisff2Pihqopu2G2zIySscchJ6lWp8QnwJBXf2FXHIW5V2QemRQ==
   
   picomatch@^2.0.4, picomatch@^2.2.1, picomatch@^2.2.3:
     version "2.3.0"
@@ -6053,7 +6087,7 @@ Lockfile:
     dependencies:
       glob "^7.1.3"
   
-  rimraf@^2.5.4, rimraf@^2.6.1, rimraf@^2.6.3:
+  rimraf@^2.5.4, rimraf@^2.6.1, rimraf@^2.6.2, rimraf@^2.6.3:
     version "2.7.1"
     resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.7.1.tgz#35797f13a7fdadc566142c29d4f07ccad483e3ec"
     integrity sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==
@@ -7167,11 +7201,6 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
     integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
   
-  vue-awesome-datepicker@^1.1.1:
-    version "1.1.1"
-    resolved "https://registry.yarnpkg.com/vue-awesome-datepicker/-/vue-awesome-datepicker-1.1.1.tgz#0ada7fb7461dc1e832a8ee6a068e3d485a17bf42"
-    integrity sha512-kSzljPqC4DjBMdOKKxf71SYzP5tT3D7LKDhCRHOwz1F6QDgoTNHfuy23Tr7I/j6FGOsvHUXyQOYvwtKJbM380A==
-  
   vue-eslint-parser@^7.10.0:
     version "7.11.0"
     resolved "https://registry.yarnpkg.com/vue-eslint-parser/-/vue-eslint-parser-7.11.0.tgz#214b5dea961007fcffb2ee65b8912307628d0daf"
@@ -7222,6 +7251,20 @@ Lockfile:
     version "1.9.1"
     resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
     integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
+  
+  vue3-persian-datepicker@^0.1.9:
+    version "0.1.9"
+    resolved "https://registry.yarnpkg.com/vue3-persian-datepicker/-/vue3-persian-datepicker-0.1.9.tgz#32190cc51907687e20f03eb5e8b5cb43e37b363b"
+    integrity sha512-hLROtGVpDfkMOylyJ99tMx4xuxVupPqoBO4sq3t0qNWtumcCaCepT8/NrsVCKuim0F2wv/Mp6sPsrmo50TFz6Q==
+    dependencies:
+      persian-date "^1.1.0"
+  
+  vue3-persian-datetime-picker@^1.1.0:
+    version "1.1.0"
+    resolved "https://registry.yarnpkg.com/vue3-persian-datetime-picker/-/vue3-persian-datetime-picker-1.1.0.tgz#e1b7bd14607c9e13d6730c9c7fe38dd71b623976"
+    integrity sha512-6ohorwAg5xjOfLGz1atRxORmsrk+8HGlsj5xy9PrN8oTI8SeH/R79Zt/xoDrJ7KkY6aEI6i1HYZPQuBI9kNDDA==
+    dependencies:
+      moment-jalaali "^0.9.2"
   
   vue@^3.0.0:
     version "3.2.19"
