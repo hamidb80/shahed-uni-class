@@ -65,17 +65,17 @@ export function genProgram(classesMap) {
           _id: classId, color,
           start: timeRange[0],
           end: timeRange[1],
-          heightOffset: 0,
+          timeOffset: 0,
         })
       }
     }
   }
 
   for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-    let heightAcc = 0
+    let timeLenAcc = 0
     for (let clsItem of result[dayIndex]) {
-      clsItem.heightOffset = heightAcc
-      heightAcc += clsItem.end - clsItem.start
+      clsItem.timeOffset = timeLenAcc
+      timeLenAcc += clsItem.end - clsItem.start
     }
   }
   return result

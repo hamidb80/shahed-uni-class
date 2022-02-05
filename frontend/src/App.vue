@@ -45,8 +45,11 @@
       <h1 class="title">مهندسی کامپیوتر دانشگاه شاهد ۹۹</h1>
     </header>
 
-    <div class="table program">
-      <div class="column times">
+    <div class="table program" @scroll="onTableScroll" ref="program_table">
+      <div
+        :class="{'column times': true, 'float': tableScroll> 20}"
+        :style="{ transform: `translateX(${tableScroll}px)`}"
+      >
         <div class="corner cell"></div>
         <div class="time cell" v-for="t in times" :key="t">
           <span class="text">
@@ -74,7 +77,10 @@
             :style="{
               transform: `translate(
                 ${(ci % 4) * classItemWidth}px,  
-                ${-clsItem.heightOffset + calcOffset(clsItem) - 6 * ci}px
+                ${
+                  (-clsItem.timeOffset / 30) * timeCellHeight +
+                  calcOffset(clsItem)
+                }px
               )`,
               height: `${calcLen(clsItem)}px`,
               backgroundColor: clsItem.color,
@@ -238,6 +244,8 @@ export default {
     timeCellHeight: 32,
     classItemWidth: 50,
 
+    tableScroll: 0,
+
     isVerifed: false,
     showMenu: false,
     form: "",
@@ -352,21 +360,25 @@ export default {
 
       let res = await httpClient.get("/getAll");
 
-      this.classes = res.data["classes"]
-      this.reminders = res.data["reminders"]
-      
-      this.trainings = res.data["trainings"]
-      this.events = res.data["events"]
+      this.classes = res.data["classes"];
+      this.reminders = res.data["reminders"];
+
+      this.trainings = res.data["trainings"];
+      this.events = res.data["events"];
 
       this.program = genProgram(this.classes);
 
-this.loading = false;
+      this.loading = false;
     },
 
     closeMenu() {
       this.showMenu = false;
       this.form = "";
       this.selectedItemId = "";
+    },
+
+    onTableScroll() {
+      this.tableScroll = this.$refs.program_table.scrollLeft;
     },
   },
 
@@ -509,6 +521,12 @@ this.loading = false;
 
     &.times {
       width: 100px;
+      z-index: 3;
+      transition: 0.5s width;
+
+      &.float {
+        width: 72px;
+      }
 
       .cell {
         color: white;
@@ -530,6 +548,7 @@ this.loading = false;
         border-radius: 12px;
       }
       .corner {
+        border: none;
         background-color: transparent;
       }
     }
