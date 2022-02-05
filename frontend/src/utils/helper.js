@@ -62,7 +62,7 @@ export function genProgram(classesMap) {
     for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
       for (let timeRange of cls["program"][dayIndex]) {
         result[dayIndex].push({
-          classId, color,
+          _id: classId, color,
           start: timeRange[0],
           end: timeRange[1],
           heightOffset: 0,

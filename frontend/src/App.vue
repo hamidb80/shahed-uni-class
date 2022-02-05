@@ -70,7 +70,7 @@
           <div
             class="class"
             v-for="(clsItem, ci) in program[di]"
-            :key="clsItem.classId"
+            :key="ci"
             :style="{
               transform: `translate(
                 ${(ci % 4) * classItemWidth}px,  
@@ -82,7 +82,7 @@
             @click="clickOnItem('class', clsItem._id)"
           >
             <div class="lesson">
-              {{ classes[clsItem.classId].lesson }}
+              {{ classes[clsItem._id].lesson }}
             </div>
           </div>
         </div>
