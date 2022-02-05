@@ -49,11 +49,10 @@ function getTrainings() {
 // ------------------- database 
 
 function appendId(obj, id = null) {
-  if (id == - null)
+  if (id == null)
     id = uuid()
 
   obj["_id"] = id
-  return obj
 }
 
 async function syncDB(firstTime = false) {
@@ -294,14 +293,15 @@ function task() {
 // ----------------------------
 
 function runScheduler() {
-  // task()
-  // return setInterval(task, 60 * 1000)
+  task()
+  return setInterval(task, 30 * 1000)
 }
 
 app.listen(3000, async () => {
-  console.log('running ...')
+  console.log('running server ...')
   await initDB()
   await syncDB(true)
-  console.log('got data')
+  console.log('database initilized')
   runScheduler()
+  console.log('scheduler started')
 })

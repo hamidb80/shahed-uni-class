@@ -109,7 +109,7 @@ export default {
   },
 
   data: () => ({
-    cid: "",
+    cid: null,
 
     teacher: "",
     lesson: "",
@@ -142,6 +142,7 @@ export default {
 
         this.fromExisting = true;
       } else {
+        this.cid = null;
         this.fromExisting = false;
       }
     },
@@ -188,7 +189,7 @@ export default {
       this.program[dayIndex].push([0, 0]);
     },
     removeTime(dayIndex, timeIndex) {
-      this.program[dayIndex].splice(timeIndex, 1)
+      this.program[dayIndex].splice(timeIndex, 1);
     },
   },
 
