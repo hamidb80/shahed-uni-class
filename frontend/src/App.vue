@@ -17,8 +17,8 @@
           :data="selectedItemId ? trainings[selectedItemId] : {}"
           :isAdmin="isVerifed"
           :classes="classes"
-          @delete="deleteEvent"
-          @createOrUpadte="createOrUpadteEvent"
+          @delete="deleteReminder"
+          @createOrUpadte="createOrUpadteReminder"
         />
         <event-form
           v-else-if="form === 'event'"
@@ -26,8 +26,8 @@
           :data="selectedItemId ? events[selectedItemId] : {}"
           :isAdmin="isVerifed"
           :classes="classes"
-          @delete="deleteEvent"
-          @createOrUpadte="createOrUpadteEvent"
+          @delete="deleteReminder"
+          @createOrUpadte="createOrUpadteReminder"
         />
         <send-message-form
           v-else-if="form === 'send-message'"
@@ -328,20 +328,20 @@ export default {
       await this.update();
     },
 
-    async createOrUpadteEvent(trId, trainingObject) {
+    async createOrUpadteReminder(trId, trainingObject) {
       this.loading = true;
 
       if (trId)
-        await httpClient.put(`/event/${trId}`, trainingObject, this.reqCfg);
-      else await httpClient.post("/event", trainingObject, this.reqCfg);
+        await httpClient.put(`/reminder/${trId}`, trainingObject, this.reqCfg);
+      else await httpClient.post("/reminder", trainingObject, this.reqCfg);
 
       await this.update();
     },
-    async deleteEvent(trId) {
+    async deleteReminder(trId) {
       this.loading = true;
       this.selectedItemId = "";
 
-      await httpClient.delete(`/event/${trId}`, this.reqCfg);
+      await httpClient.delete(`/reminder/${trId}`, this.reqCfg);
       await this.update();
     },
 
