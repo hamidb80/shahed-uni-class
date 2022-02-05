@@ -532,8 +532,6 @@ export default {
 
     @media screen and (max-width: @mobile-width) {
       .cell {
-        height: 56px;
-
         .text,
         .class {
           font-size: 15px;
