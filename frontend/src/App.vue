@@ -523,6 +523,7 @@ export default {
       width: 100px;
       z-index: 3;
       transition: 0.5s width;
+      will-change: width;
 
       &.float {
         width: 72px;
