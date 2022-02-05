@@ -48,10 +48,12 @@ function getTrainings() {
 
 // ------------------- database 
 
-function appendId(obj) {
-  let id = uuid()
+function appendId(obj, id = null) {
+  if (id == - null)
+    id = uuid()
+
   obj["_id"] = id
-  return id
+  return obj
 }
 
 async function syncDB(firstTime = false) {
@@ -93,7 +95,8 @@ app.post('/api/class', checkSecretKey(async (req, res) => {
     errors = validateClass(newClass)
 
   if (errors.length === 0) {
-    classesMap[id] = appendId(newClass)
+    appendId(newClass)
+    classesMap[newClass._id] = newClass
     await syncDB()
     res.send(newClass)
   }
@@ -107,9 +110,9 @@ app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
     errors = validateClass(edittedClass)
 
   if (errors.length === 0 && cid in classesMap) {
-    classesMap[cid] = edittedClass
+    classesMap[cid] = appendId(edittedClass, cid)
     await syncDB()
-    res.status(200).send()
+    res.send(edittedClass)
   }
   else
     res.status(400).send(errors)
@@ -119,7 +122,7 @@ app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
   remindersMap = objecFilter(remindersMap, (_, ev) => ev["classId"] != cid)
   classesMap[cid] = undefined
   await syncDB()
-  res.status(200).send()
+  res.send()
 }))
 
 app.post('/api/reminder', checkSecretKey(async (req, res) => {
@@ -138,13 +141,13 @@ app.post('/api/reminder', checkSecretKey(async (req, res) => {
 app.put('/api/reminder/:evid', checkSecretKey(async (req, res) => {
   let
     edittedEvent = req.body,
-    errors = validateEvent(),
+    errors = validateEvent(edittedEvent),
     evid = req.params.evid
 
   if (errors.length === 0) {
-    remindersMap[evid] = edittedEvent
+    remindersMap[evid] = appendId(edittedEvent, evid)
     await syncDB()
-    res.status(200).send()
+    res.send()
   }
   else
     res.status(400).send(errors)
@@ -152,7 +155,7 @@ app.put('/api/reminder/:evid', checkSecretKey(async (req, res) => {
 app.delete('/api/reminder/:evid', checkSecretKey(async (req, res) => {
   remindersMap[req.params.evid] = undefined
   await syncDB()
-  res.status(200).send()
+  res.send()
 }))
 
 // telegram bot -------------------------

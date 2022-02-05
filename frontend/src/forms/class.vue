@@ -42,7 +42,7 @@
       </div>
     </div>
 
-    <div class="class-time-settings">
+    <div class="class-times">
       <div
         v-for="di in selectedDays"
         :key="di"
@@ -52,20 +52,31 @@
         <div class="name">
           {{ weekDays[di] }}
         </div>
-        <div class="times">
-          <!-- <div
-            v-for="(time, ti) in classTimes"
-            :key="ti"
-            @click="toggleTime(di, ti)"
-            :class="[
-              'time',
-              {
-                active: program[di].includes(ti),
-              },
-            ]"
+        <div class="times-editor" v-if="isAdmin">
+          <div
+            class="time-range-editor-wrapper"
+            v-for="(tr, ti) in program[di]"
+            :key="`${tr[0]}-${tr[1]}`"
           >
-            {{ time }}
-          </div> -->
+            <div class="time-range-editor">
+              <time-picker v-model="program[di][ti][0]" />
+              <span> - </span>
+              <time-picker v-model="program[di][ti][1]" />
+            </div>
+            <div class="icon-wrapper remove-icon" @click="removeTime(di, ti)">
+              <remove-icon class="icon"></remove-icon>
+            </div>
+          </div>
+          <div>
+            <div class="icon-wrapper add-icon" @click="addTime(di)">
+              <add-icon class="icon"></add-icon>
+            </div>
+          </div>
+        </div>
+        <div class="times" v-else>
+          <div class="time-range" v-for="(tr, ti) in program[di]" :key="ti">
+            {{ toPersianTime(tr[0]) }} - {{ toPersianTime(tr[1]) }}
+          </div>
         </div>
       </div>
     </div>
@@ -78,7 +89,10 @@
 </template>
 
 <script>
-import { weekDays } from "../utils/helper.js";
+import { weekDays, toPersianTime } from "../utils/helper.js";
+import TimePicker from "../components/time-picker.vue";
+import addI from "../icons/vue/add.vue";
+import removeI from "../icons/vue/remove.vue";
 
 export default {
   props: {
@@ -88,7 +102,15 @@ export default {
 
   emits: ["delete", "createOrUpadte"],
 
+  components: {
+    "time-picker": TimePicker,
+    "add-icon": addI,
+    "remove-icon": removeI,
+  },
+
   data: () => ({
+    cid: "",
+
     teacher: "",
     lesson: "",
     description: "",
@@ -103,19 +125,12 @@ export default {
     weekDays,
   }),
 
-  watch: {
-    data(newD) {
-      this.checkInput(newD);
-    },
-  },
-
-  mounted() {
-    this.checkInput(this.data);
-  },
-
   methods: {
-    checkInput(inputData) {
+    toPersianTime,
+
+    syncInput(inputData) {
       if (Object.keys(inputData).length !== 0) {
+        this.cid = inputData["_id"];
         this.teacher = inputData["teacher"];
         this.lesson = inputData["lesson"];
         this.program = inputData["program"];
@@ -145,18 +160,18 @@ export default {
         this.program[di] = [];
       }
     },
-    toggleTime(di, ti) {
-      // di => day index , ti => time index
-      if (!this.isAdmin) return;
 
-      let i = this.program[di].findIndex((v) => v === ti);
-
-      if (i === -1) this.program[di].push(ti);
-      else this.program[di].splice(i, 1);
+    correctProgramErrors() {
+      for (let day of this.program) {
+        for (const timeRange of day) {
+          timeRange[1] = Math.max(timeRange[0] + 10, timeRange[1]);
+        }
+      }
     },
 
     handleSubmit() {
-      this.$emit("createOrUpadte", this.fromExisting ? this.data["_id"] : "", {
+      this.correctProgramErrors();
+      this.$emit("createOrUpadte", this.fromExisting ? this.cid : "", {
         teacher: this.teacher,
         lesson: this.lesson,
         program: this.program,
@@ -166,14 +181,32 @@ export default {
     },
 
     handleDelete() {
-      this.$emit("delete", this.data["_id"]);
+      this.$emit("delete", this.cid);
     },
+
+    addTime(dayIndex) {
+      this.program[dayIndex].push([0, 0]);
+    },
+    removeTime(dayIndex, timeIndex) {
+      this.program[dayIndex].splice(timeIndex, 1)
+    },
+  },
+
+  watch: {
+    data(newD) {
+      this.syncInput(newD);
+    },
+  },
+
+  mounted() {
+    this.syncInput(this.data);
   },
 };
 </script>
 
 <style scoped lang="less">
 @import url("../styles/form.less");
+
 .form {
   .days {
     display: flex;
@@ -202,7 +235,7 @@ export default {
     }
   }
 
-  .class-time-settings {
+  .class-times {
     display: flex;
     flex-direction: column;
 
@@ -211,6 +244,7 @@ export default {
       flex-direction: row-reverse;
       border-top: 1px solid #eee;
       align-items: center;
+      justify-content: space-between;
 
       .name {
         .fa();
@@ -221,23 +255,64 @@ export default {
       .times {
         flex-grow: 1;
         flex-wrap: wrap;
-        display: inline-flex;
+        display: flex;
         flex-direction: row;
 
-        .time {
+        .time-range {
+          .fa();
           .mx(6px);
           .my(4px);
           border-radius: 4px;
           background-color: #eee;
           color: #212121;
-          .fa();
           direction: ltr;
-          cursor: pointer;
           padding: 6px 12px;
+        }
+      }
 
-          &.active {
-            color: white;
-            background-color: @c1;
+      .times-editor {
+        display: flex;
+        flex-direction: column;
+
+        .time-range-editor-wrapper {
+          display: flex;
+          align-items: center;
+          margin-top: 6px;
+
+          .time-range-editor {
+            margin-right: 16px;
+          }
+        }
+
+        .icon-wrapper {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          margin-top: 2px;
+          border-radius: 2px;
+          .square(20px);
+          border: 2px solid @c3;
+
+          .icon {
+            fill: white;
+          }
+
+          &.add-icon {
+            background-color: @c3;
+            .my(8px);
+          }
+
+          &.remove-icon {
+            background-color: @c3;
+          }
+
+          &:hover {
+            background-color: white;
+
+            .icon {
+              fill: @c3;
+            }
           }
         }
       }
@@ -253,7 +328,7 @@ export default {
       }
     }
 
-    .class-time-settings {
+    .class-times {
       .day {
         flex-direction: column;
 

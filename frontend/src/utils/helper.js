@@ -1,4 +1,5 @@
 import randint from "random-int"
+import { convertEnToPe } from "persian-number"
 
 function iter(from, to, step) {
   let result = []
@@ -14,7 +15,7 @@ function clockify(n) {
 }
 
 export function minutes2TimeArray(m) {
-  return [clockify(Math.floor(m / 60)), clockify(m % 60)]
+  return [Math.floor(m / 60), m % 60]
 }
 
 export const
@@ -29,7 +30,7 @@ export const
   ],
 
   timeSpace = 30,
-  times = iter(8 * 60, 22 * 60, timeSpace) // from 8:00 to 22:00 by 30 mins
+  times = iter(7.5 * 60, 22 * 60, timeSpace) // from 8:00 to 22:00 by 30 mins
 
 
 const classColors = [
@@ -40,6 +41,12 @@ const classColors = [
   "#8bc34a",
   "#ffc107"
 ]
+
+
+export function toPersianTime(minutes) {
+  let ta = minutes2TimeArray(minutes)
+  return convertEnToPe(`${clockify(ta[0])}:${clockify(ta[1])}`)
+}
 
 export function genProgram(classesMap) {
   let result = []

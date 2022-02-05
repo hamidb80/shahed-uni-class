@@ -6,7 +6,7 @@
         <login-form v-else-if="form === 'login'" @submit="login" />
         <class-form
           v-else-if="form === 'class'"
-          :data="selectedClassId ? classes[selectedClassId] : {}"
+          :data="selectedItemId ? classes[selectedItemId] : {}"
           :isAdmin="isVerifed"
           @delete="deleteClass"
           @createOrUpadte="createOrUpadteClass"
@@ -14,7 +14,7 @@
         <event-form
           v-else-if="form === 'training'"
           type="training"
-          :data="selectedTrainingId ? trainings[selectedTrainingId] : {}"
+          :data="selectedItemId ? trainings[selectedItemId] : {}"
           :isAdmin="isVerifed"
           :classes="classes"
           @delete="deleteEvent"
@@ -23,7 +23,7 @@
         <event-form
           v-else-if="form === 'event'"
           type="event"
-          :data="selectedEventId ? events[selectedEventId] : {}"
+          :data="selectedItemId ? events[selectedItemId] : {}"
           :isAdmin="isVerifed"
           :classes="classes"
           @delete="deleteEvent"
@@ -74,7 +74,7 @@
             :style="{
               transform: `translate(
                 ${(ci % 4) * classItemWidth}px,  
-                ${-clsItem.heightOffset + calcOffset(clsItem)}px
+                ${-clsItem.heightOffset + calcOffset(clsItem) - 6 * ci}px
               )`,
               height: `${calcLen(clsItem)}px`,
               backgroundColor: clsItem.color,
@@ -182,11 +182,10 @@
 import {
   weekDays,
   times,
-  minutes2TimeArray,
+  toPersianTime,
   genProgram,
   timeSpace,
 } from "./utils/helper.js";
-import { convertEnToPe } from "persian-number";
 
 import axios from "axios";
 
@@ -243,10 +242,7 @@ export default {
     showMenu: false,
     form: "",
     secretKey: "",
-
-    selectedClassId: "",
-    selectedTrainingId: "",
-    selectedEventId: "",
+    selectedItemId: "",
 
     classes: {}, // classId => class{teacher, lesson, program}
     trainings: {},
@@ -264,10 +260,7 @@ export default {
   },
 
   methods: {
-    toPersianTime(minutes) {
-      let ta = minutes2TimeArray(minutes);
-      return convertEnToPe(`${ta[0]}:${ta[1]}`);
-    },
+    toPersianTime,
 
     calcOffset(clsItem) {
       return (
@@ -293,9 +286,9 @@ export default {
       this.showMenu = true;
       this.form = formName;
 
-      if (formName === "class") this.selectedClassId = itemId;
-      else if (formName === "training") this.selectedTrainingId = itemId;
-      else if (formName === "event") this.selectedEventId = itemId;
+      if (formName === "class") this.selectedItemId = itemId;
+      else if (formName === "training") this.selectedItemId = itemId;
+      else if (formName === "event") this.selectedItemId = itemId;
     },
 
     handleClassRedirect(classId) {
@@ -329,7 +322,7 @@ export default {
     },
     async deleteClass(classId) {
       this.loading = true;
-      this.selectedClassId = "";
+      this.selectedItemId = "";
 
       await httpClient.delete(`/class/${classId}`, this.reqCfg);
       await this.update();
@@ -346,8 +339,7 @@ export default {
     },
     async deleteEvent(trId) {
       this.loading = true;
-      this.selectedTrainingId = "";
-      this.selectedEventId = "";
+      this.selectedItemId = "";
 
       await httpClient.delete(`/event/${trId}`, this.reqCfg);
       await this.update();
@@ -370,14 +362,15 @@ export default {
     closeMenu() {
       this.showMenu = false;
       this.form = "";
-      this.selectedTrainingId = "";
-      this.selectedClassId = "";
-      this.selectedEventId = "";
+      this.selectedItemId = "";
     },
   },
 
   mounted() {
     this.update();
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") this.closeMenu();
+    });
   },
 };
 </script>
@@ -418,7 +411,7 @@ export default {
     flex-shrink: 0;
     flex-direction: column;
     white-space: normal;
-    width: 200px;
+    width: 210px;
 
     .classes {
       .class {
@@ -427,7 +420,7 @@ export default {
         border-radius: 4px;
         .px(6px);
         .py(2px);
-        .mx(5px);
+        margin-left: 10px;
         // display: inline-block;
 
         overflow: hidden;
