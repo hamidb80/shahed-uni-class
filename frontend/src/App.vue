@@ -47,8 +47,8 @@
 
     <div class="table program" @scroll="onTableScroll" ref="program_table">
       <div
-        :class="{'column times': true, 'float': tableScroll> 20}"
-        :style="{ transform: `translateX(${tableScroll}px)`}"
+        :class="{ 'column times': true, float: tableScroll > 20 }"
+        :style="{ transform: `translateX(${tableScroll}px)` }"
       >
         <div class="corner cell"></div>
         <div class="time cell" v-for="t in times" :key="t">
@@ -521,9 +521,7 @@ export default {
 
     &.times {
       width: 100px;
-      z-index: 3;
-      transition: 0.5s width;
-      will-change: width;
+      z-index: 1;
 
       &.float {
         width: 72px;
