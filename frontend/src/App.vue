@@ -11,19 +11,19 @@
           @delete="deleteClass"
           @createOrUpadte="createOrUpadteClass"
         />
-        <event-form
+        <reminder-form
           v-else-if="form === 'training'"
           type="training"
-          :data="selectedItemId ? trainings[selectedItemId] : {}"
+          :data="selectedItemId ? reminders[selectedItemId] : {}"
           :isAdmin="isVerifed"
           :classes="classes"
           @delete="deleteReminder"
           @createOrUpadte="createOrUpadteReminder"
         />
-        <event-form
+        <reminder-form
           v-else-if="form === 'event'"
           type="event"
-          :data="selectedItemId ? events[selectedItemId] : {}"
+          :data="selectedItemId ? reminders[selectedItemId] : {}"
           :isAdmin="isVerifed"
           :classes="classes"
           @delete="deleteReminder"
@@ -79,7 +79,7 @@
               height: `${calcLen(clsItem)}px`,
               backgroundColor: clsItem.color,
             }"
-            @click="clickOnItem('class', clsItem.classId)"
+            @click="clickOnItem('class', clsItem._id)"
           >
             <div class="lesson">
               {{ classes[clsItem.classId].lesson }}
@@ -103,7 +103,7 @@
         <tr
           v-for="(tr, id) in trainings"
           :key="id"
-          @click="clickOnItem('training', id)"
+          @click="clickOnItem('training', tr._id)"
         >
           <td>{{ tr["name"] }}</td>
           <td>{{ classes[tr["classId"]]["lesson"] }}</td>
@@ -128,7 +128,7 @@
         <tr
           v-for="(ev, id) in events"
           :key="id"
-          @click="clickOnItem('event', id)"
+          @click="clickOnItem('event', ev._id)"
         >
           <td>{{ ev["name"] }}</td>
           <td>{{ classes[ev["classId"]]["lesson"] }}</td>
@@ -200,7 +200,7 @@ import uniI from "./icons/vue/university.vue";
 
 import loginF from "./forms/login.vue";
 import classF from "./forms/class.vue";
-import eventF from "./forms/event.vue";
+import eventF from "./forms/reminder.vue";
 import sendMsgF from "./forms/send-msg.vue";
 import classListF from "./forms/class-list.vue";
 
@@ -227,7 +227,7 @@ export default {
 
     "class-form": classF,
     "login-form": loginF,
-    "event-form": eventF,
+    "reminder-form": eventF,
     "send-message-form": sendMsgF,
     "class-list-form": classListF,
   },
@@ -245,8 +245,10 @@ export default {
     selectedItemId: "",
 
     classes: {}, // classId => class{teacher, lesson, program}
-    trainings: {},
-    events: {},
+    reminders: {},
+
+    trainings: [],
+    events: [],
 
     program: [[], [], [], [], [], [], []],
 
@@ -350,13 +352,15 @@ export default {
 
       let res = await httpClient.get("/getAll");
 
-      this.classes = res.data.classes;
-      this.trainings = res.data.trainings;
-      this.events = res.data.events;
+      this.classes = res.data["classes"]
+      this.reminders = res.data["reminders"]
+      
+      this.trainings = res.data["trainings"]
+      this.events = res.data["events"]
 
       this.program = genProgram(this.classes);
 
-      this.loading = false;
+this.loading = false;
     },
 
     closeMenu() {

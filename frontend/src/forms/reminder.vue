@@ -156,7 +156,7 @@ export default {
 
   watch: {
     data(newD) {
-      this.checkInput(newD);
+      this.syncInput(newD);
     },
 
     date() {
@@ -164,13 +164,6 @@ export default {
         this.showDateSelector = false;
       }
     },
-  },
-
-  mounted() {
-    this.checkInput(this.data);
-
-    for (const clsId in this.classes)
-      this.cachedClassesList.push(this.classes[clsId]);
   },
 
   methods: {
@@ -193,8 +186,8 @@ export default {
       this.NameOrTeacher = serilizeClass(this.classes[clsId]);
     },
 
-    checkInput(inputData) {
-      if (Object.keys(inputData).length !== 0) {
+    syncInput(inputData) {
+      if (inputData && Object.keys(inputData).length !== 0) {
         this.description = inputData["description"];
         this.fromExisting = true;
 
@@ -240,6 +233,13 @@ export default {
     handleDelete() {
       this.$emit("delete", this.data["_id"]);
     },
+  },
+
+  mounted() {
+    this.syncInput(this.data);
+
+    for (const clsId in this.classes)
+      this.cachedClassesList.push(this.classes[clsId]);
   },
 };
 </script>

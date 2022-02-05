@@ -10,7 +10,7 @@ import moment from 'moment'
 import { validateClass, validateEvent } from './types.js'
 import { getClassShortInfo, getEventInfo } from './serialize.js'
 import { initDB, readDB, saveDB } from './db.js'
-import { objectMap2Array, objecFilter, arr2object } from '../utils/object.js'
+import { objectMap2Array, objecFilter } from '../utils/object.js'
 import { object2array } from '../utils/array.js'
 import { getCurrentWeekTimeInfo } from '../utils/time.js'
 import { bold, markdownV2Escape } from '../utils/tg.js'
@@ -82,7 +82,10 @@ app.get('/api/now', (req, res) => {
   res.send(moment().format())
 })
 app.get('/api/getAll', async (req, res) => {
-  res.send({ classes: classesMap, trainings: getTrainings(), events: getEvents() })
+  res.send({
+    classes: classesMap, reminders: remindersMap,
+    trainings: getTrainings(), events: getEvents()
+  })
 })
 app.post('/api/verify', (req, res) => {
   res.send({ result: req.body.secretKey === SECRET_KEY })
@@ -109,7 +112,8 @@ app.put('/api/class/:cid', checkSecretKey(async (req, res) => {
     errors = validateClass(edittedClass)
 
   if (errors.length === 0 && cid in classesMap) {
-    classesMap[cid] = appendId(edittedClass, cid)
+    appendId(edittedClass, cid)
+    classesMap[cid] = edittedClass
     await syncDB()
     res.send(edittedClass)
   }
@@ -126,25 +130,26 @@ app.delete('/api/class/:cid', checkSecretKey(async (req, res) => {
 
 app.post('/api/reminder', checkSecretKey(async (req, res) => {
   let
-    newEvent = req.body,
-    errors = validateEvent(newEvent)
+    newReminder = req.body,
+    errors = validateEvent(newReminder)
 
   if (errors.length === 0) {
-    appendId(newEvent)
-    remindersMap[newEvent._id] = newEvent
+    appendId(newReminder)
+    remindersMap[newReminder._id] = newReminder
     await syncDB()
-    res.send(newEvent)
+    res.send(newReminder)
   } else
     res.status(400).send(errors)
 }))
 app.put('/api/reminder/:evid', checkSecretKey(async (req, res) => {
   let
-    edittedEvent = req.body,
-    errors = validateEvent(edittedEvent),
+    edittedReminder = req.body,
+    errors = validateEvent(edittedReminder),
     evid = req.params.evid
 
   if (errors.length === 0) {
-    remindersMap[evid] = appendId(edittedEvent, evid)
+    appendId(edittedReminder, evid)
+    remindersMap[evid] = edittedReminder
     await syncDB()
     res.send()
   }
