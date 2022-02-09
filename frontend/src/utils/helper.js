@@ -49,10 +49,7 @@ export function toPersianTime(minutes) {
 }
 
 export function genProgram(classesMap) {
-  let result = []
-
-  for (let dayIndex = 0; dayIndex < 7; dayIndex++)
-    result.push([])
+  let result = [[], [], [], [], [], [], []]
 
   for (let classId in classesMap) {
     let
@@ -73,6 +70,9 @@ export function genProgram(classesMap) {
 
   for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
     let timeLenAcc = 0
+
+    result[dayIndex].sort((a, b) => a.start - b.start)
+
     for (let clsItem of result[dayIndex]) {
       clsItem.timeOffset = timeLenAcc
       timeLenAcc += clsItem.end - clsItem.start

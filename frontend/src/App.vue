@@ -65,7 +65,11 @@
           </span>
         </div>
 
-        <div class="time cell" v-for="(time, ti) in times" :key="ti"></div>
+        <div
+          :class="{ 'time cell': true, active: ti == currentTimeIndex }"
+          v-for="(time, ti) in times"
+          :key="ti"
+        ></div>
         <div
           class="classes"
           :style="{ marginTop: `-${times.length * timeCellHeight}px` }"
@@ -243,6 +247,7 @@ export default {
     times,
     timeCellHeight: 32,
     classItemWidth: 50,
+    currentTimeIndex: null,
 
     tableScroll: 0,
 
@@ -359,13 +364,18 @@ export default {
       this.loading = true;
 
       let res = await httpClient.get("/getAll");
+      let now = new Date((await httpClient.get("/now")).data.split("+")[0]);
+      let inMinutes = now.getHours() * 60 + now.getMinutes();
+
+      console.log(times, now, inMinutes);
+
+      this.currentTimeIndex = times.findIndex((t) => inMinutes <= t);
+      console.log(this.currentTimeIndex);
 
       this.classes = res.data["classes"];
       this.reminders = res.data["reminders"];
-
       this.trainings = res.data["trainings"];
       this.events = res.data["events"];
-
       this.program = genProgram(this.classes);
 
       this.loading = false;
@@ -517,6 +527,10 @@ export default {
       .day {
         background-color: @c1;
       }
+    }
+
+    .cell.active {
+      background-color: @highlight;
     }
 
     &.times {
