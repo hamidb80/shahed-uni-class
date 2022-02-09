@@ -99,6 +99,11 @@
       </div>
     </div>
 
+    <h2 v-if="now" class="fa today">
+      امروز
+      {{ en2fa(now.jy) }}/{{ en2fa(now.jm) }}/{{ en2fa(now.jd) }}
+    </h2>
+
     <section class="tranings-wrapper">
       <header>
         <h2>تمرین ها</h2>
@@ -195,9 +200,12 @@ import {
   toPersianTime,
   genProgram,
   timeSpace,
+  findIndexEnd,
 } from "./utils/helper.js";
 
 import axios from "axios";
+import j from "jalaali-js";
+import { convertEnToPe } from "persian-number";
 
 import loginI from "./icons/vue/login.vue";
 import moreI from "./icons/vue/more.vue";
@@ -247,6 +255,8 @@ export default {
     times,
     timeCellHeight: 32,
     classItemWidth: 50,
+
+    now: null,
     currentTimeIndex: null,
 
     tableScroll: 0,
@@ -276,6 +286,7 @@ export default {
 
   methods: {
     toPersianTime,
+    en2fa: convertEnToPe,
 
     calcOffset(clsItem) {
       return (
@@ -367,16 +378,14 @@ export default {
       let now = new Date((await httpClient.get("/now")).data.split("+")[0]);
       let inMinutes = now.getHours() * 60 + now.getMinutes();
 
-      console.log(times, now, inMinutes);
-
-      this.currentTimeIndex = times.findIndex((t) => inMinutes <= t);
-      console.log(this.currentTimeIndex);
-
       this.classes = res.data["classes"];
       this.reminders = res.data["reminders"];
       this.trainings = res.data["trainings"];
       this.events = res.data["events"];
+
       this.program = genProgram(this.classes);
+      this.now = j.toJalaali(now);
+      this.currentTimeIndex = findIndexEnd(times, (t) => inMinutes >= t);
 
       this.loading = false;
     },
@@ -565,16 +574,13 @@ export default {
         background-color: transparent;
       }
     }
-
-    @media screen and (max-width: @mobile-width) {
-      .cell {
-        .text,
-        .class {
-          font-size: 15px;
-        }
-      }
-    }
   }
+}
+
+.today {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 section {
@@ -584,6 +590,7 @@ section {
   header {
     h2 {
       .fa();
+      padding-right: 10px;
     }
   }
 

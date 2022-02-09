@@ -1,13 +1,8 @@
 import moment from 'moment'
 import jalaali from 'jalaali-js'
 
-import { isBetween, modulo } from "./math.js"
+import { modulo } from "./math.js"
 import PN from "persian-number"
-
-
-// function arrTime2Minutes(arrTime) {
-//   return arrTime[0] * 60 + arrTime[1]
-// }
 
 export function moment2Minutes(du) {
   return du.hours() * 60 + du.minutes()

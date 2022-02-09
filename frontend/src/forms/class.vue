@@ -67,7 +67,7 @@
               <remove-icon class="icon"></remove-icon>
             </div>
           </div>
-          <div>
+          <div class="centered-wrapper">
             <div class="icon-wrapper add-icon" @click="addTime(di)">
               <add-icon class="icon"></add-icon>
             </div>
@@ -89,7 +89,7 @@
 </template>
 
 <script>
-import { weekDays, toPersianTime } from "../utils/helper.js";
+import { weekDays, toPersianTime, times } from "../utils/helper.js";
 import TimePicker from "../components/time-picker.vue";
 import addI from "../icons/vue/add.vue";
 import removeI from "../icons/vue/remove.vue";
@@ -165,6 +165,7 @@ export default {
     correctProgramErrors() {
       for (let day of this.program) {
         for (const timeRange of day) {
+          timeRange[0] = Math.max(times[0], timeRange[0]);
           timeRange[1] = Math.max(timeRange[0] + 10, timeRange[1]);
         }
       }
@@ -283,6 +284,11 @@ export default {
           .time-range-editor {
             margin-right: 16px;
           }
+        }
+
+        .centered-wrapper {
+          display: flex;
+          justify-content: center;
         }
 
         .icon-wrapper {

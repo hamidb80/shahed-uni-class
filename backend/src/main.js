@@ -4,13 +4,15 @@ import TelegramBot from 'node-telegram-bot-api'
 import path from 'path'
 import { v4 as uuid } from 'uuid'
 
+import PN from "persian-number"
 import { difference } from "set-operations"
+import { toJalaali } from 'jalaali-js'
 import moment from 'moment'
 
 import { validateClass, validateEvent } from './types.js'
 import { getClassShortInfo, getEventInfo } from './serialize.js'
 import { initDB, readDB, saveDB } from './db.js'
-import { objectMap2Array, objecFilter } from '../utils/object.js'
+import { objectMap2Array, objecFilter, extractKeys } from '../utils/object.js'
 import { object2array } from '../utils/array.js'
 import { getCurrentWeekTimeInfo } from '../utils/time.js'
 import { bold, markdownV2Escape } from '../utils/tg.js'
@@ -196,6 +198,7 @@ bot.on("message", async (msg) => {
           ["/classes", "کلاس های در حال برگزاری"],
           ["/trainings", "تمرین ها"],
           ["/events", "رویداد ها"],
+          ["/today", "تاریخ امروز"],
           ["/fal", "فال"],
           ["/hadis", "حدیث امروز"],
         ].map(arr => arr.join('  ')).join("\n"),
@@ -242,6 +245,10 @@ bot.on("message", async (msg) => {
     }
     else if (msg.text.startsWith('/hadis')) {
       send(['حدیث امروز :\n', await HadithOfDay()].join('\n'), true)
+    }
+    else if (msg.text.startsWith('/today')) {
+      let today = PN.convertEnToPe(extractKeys(toJalaali(new Date()), ["jy", "jm", "jd"]).join("/"))
+      send(['امروز', today].join(': '), true)
     }
   } catch (e) { }
 })

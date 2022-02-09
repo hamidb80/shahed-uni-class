@@ -80,3 +80,11 @@ export function genProgram(classesMap) {
   }
   return result
 }
+
+export function findIndexEnd(arr, fn) {
+  for (let i = arr.length - 1; i >= 0; i--)
+    if (fn(arr[i]))
+      return i
+
+  return -1
+}
