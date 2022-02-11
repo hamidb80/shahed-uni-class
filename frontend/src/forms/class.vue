@@ -36,7 +36,7 @@
         v-for="(day, di) in weekDays"
         :key="di"
         @click="toggleDay(di)"
-        :class="['day', { active: selectedDays.includes(di) }]"
+        :class="['day', { active: program[di].length != 0 }]"
       >
         <span> {{ day }} </span>
       </div>
@@ -44,10 +44,10 @@
 
     <div class="class-times">
       <div
-        v-for="di in selectedDays"
+        v-for="(day, di) in program"
         :key="di"
         class="day"
-        v-show="program[di] !== null"
+        v-show="day.length !== 0"
       >
         <div class="name">
           {{ weekDays[di] }}
@@ -89,7 +89,7 @@
 </template>
 
 <script>
-import { weekDays, toPersianTime, times } from "../utils/helper.js";
+import { weekDays, toPersianTime, times, limit } from "../utils/helper.js";
 import TimePicker from "../components/time-picker.vue";
 import addI from "../icons/vue/add.vue";
 import removeI from "../icons/vue/remove.vue";
@@ -120,8 +120,6 @@ export default {
 
     // ----------------
     fromExisting: false,
-    selectedDays: [],
-
     weekDays,
   }),
 
@@ -136,10 +134,6 @@ export default {
         this.program = inputData["program"];
         this.notes = inputData["notes"];
         this.description = inputData["description"];
-        this.selectedDays = inputData["program"]
-          .map((day, i) => (day.length !== 0 ? i : -1))
-          .filter((n) => n !== -1);
-
         this.fromExisting = true;
       } else {
         this.cid = null;
@@ -148,25 +142,19 @@ export default {
     },
 
     toggleDay(di) {
-      // di => day index
-      if (!this.isAdmin) return;
-
-      let i = this.selectedDays.findIndex((d) => d === di);
-
-      if (i === -1) {
-        this.selectedDays.push(di);
-        this.selectedDays.sort();
-      } else {
-        this.selectedDays.splice(i, 1);
-        this.program[di] = [];
-      }
+      if (this.program[di].length == 0) this.program[di].push([0, 0]);
+      else this.program[di] = [];
     },
 
     correctProgramErrors() {
       for (let day of this.program) {
         for (const timeRange of day) {
-          timeRange[0] = Math.max(times[0], timeRange[0]);
-          timeRange[1] = Math.max(timeRange[0] + 10, timeRange[1]);
+          timeRange[0] = limit(timeRange[0], times[0], times[times.length - 2]);
+          timeRange[1] = limit(
+            timeRange[1],
+            timeRange[0] + 10,
+            times[times.length - 1]
+          );
         }
       }
     },

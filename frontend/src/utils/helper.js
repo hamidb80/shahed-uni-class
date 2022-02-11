@@ -10,6 +10,10 @@ function iter(from, to, step) {
   return result
 }
 
+export function limit(n, start, end) {
+  return Math.min(Math.max(n, start), end)
+}
+
 function clockify(n) {
   return (n >= 10 ? "" : "0") + n
 }
@@ -88,3 +92,4 @@ export function findIndexEnd(arr, fn) {
 
   return -1
 }
+

@@ -51,7 +51,11 @@
         :style="{ transform: `translateX(${tableScroll}px)` }"
       >
         <div class="corner cell"></div>
-        <div class="time cell" v-for="t in times" :key="t">
+        <div
+          :class="{ 'time cell': true, last: ti + 1 == times.length }"
+          v-for="(t, ti) in times"
+          :key="t"
+        >
           <span class="text">
             {{ toPersianTime(t) }}
           </span>
@@ -66,13 +70,17 @@
         </div>
 
         <div
-          :class="{ 'time cell': true, active: ti == currentTimeIndex }"
+          :class="{
+            'time cell': true,
+            active: ti == currentTimeIndex,
+            last: ti + 1 == times.length,
+          }"
           v-for="(time, ti) in times"
           :key="ti"
         ></div>
         <div
           class="classes"
-          :style="{ marginTop: `-${times.length * timeCellHeight}px` }"
+          :style="{ marginTop: `-${(times.length - 1) * timeCellHeight}px` }"
         >
           <div
             class="class"
@@ -471,8 +479,8 @@ export default {
 
     .cell {
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       border: 0.5px solid #d1d1d1;
       width: 100%;
       height: @timeCellHeight;
@@ -494,29 +502,8 @@ export default {
         border-left-color: white;
       }
 
-      .class {
-        height: 100%;
-        flex-grow: 1;
-        display: flex;
-        padding: 4px;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-
-        border: 0.5px solid #aaa;
-        border-bottom: none;
-        border-top: none;
-
-        &:first-child {
-          border-left: none;
-        }
-        &:last-child {
-          border-right: none;
-        }
-
-        &:hover {
-          background-color: #c8f6ed;
-        }
+      &.last {
+        display: none;
       }
     }
 
@@ -539,7 +526,8 @@ export default {
     }
 
     .cell.active {
-      background-color: @highlight;
+      background-color: @highlight2;
+      border-color: @almostWhite;
     }
 
     &.times {
