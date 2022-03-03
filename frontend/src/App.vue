@@ -62,7 +62,11 @@
         </div>
       </div>
 
-      <div class="column" v-for="(day, di) in program" :key="di">
+      <div
+        :class="{ column: true, active: di == currentDayIndex }"
+        v-for="(day, di) in program"
+        :key="di"
+      >
         <div class="day cell">
           <span class="text">
             {{ weekDays[di] }}
@@ -209,6 +213,7 @@ import {
   genProgram,
   timeSpace,
   findIndexEnd,
+  adjust,
 } from "./utils/helper.js";
 
 import axios from "axios";
@@ -265,6 +270,7 @@ export default {
     classItemWidth: 50,
 
     now: null,
+    currentDayIndex: null,
     currentTimeIndex: null,
 
     tableScroll: 0,
@@ -385,6 +391,7 @@ export default {
       let res = await httpClient.get("/getAll");
       let now = new Date((await httpClient.get("/now")).data.split("+")[0]);
       let inMinutes = now.getHours() * 60 + now.getMinutes();
+      this.currentDayIndex = adjust(now.getDay(), +1, 7);
 
       this.classes = res.data["classes"];
       this.reminders = res.data["reminders"];
@@ -484,6 +491,7 @@ export default {
       border: 0.5px solid #d1d1d1;
       width: 100%;
       height: @timeCellHeight;
+      background-color: @almostWhite;
 
       .text {
         .fa();
@@ -500,6 +508,7 @@ export default {
       &.day {
         border-right-color: white;
         border-left-color: white;
+        background-color: @c2;
       }
 
       &.last {
@@ -507,16 +516,7 @@ export default {
       }
     }
 
-    &:nth-child(even) {
-      .cell {
-        background-color: @almostWhite;
-      }
-      .day {
-        background-color: @c2;
-      }
-    }
-
-    &:nth-child(odd) {
+    &.active {
       .cell {
         background-color: white;
       }

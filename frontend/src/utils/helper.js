@@ -93,3 +93,12 @@ export function findIndexEnd(arr, fn) {
   return -1
 }
 
+export function adjust(number, move, modulo) {
+  let diff = number + move
+  if (diff < 0)
+    return modulo + diff
+  else if (diff >= modulo)
+    return diff % modulo
+  else
+    return diff
+}
